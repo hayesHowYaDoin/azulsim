@@ -11,5 +11,5 @@ analyze:
 test:
 	poetry run pytest .
 
-run:
-	poetry run python -m apps.main
+# run:
+# 	poetry run python -m apps.main

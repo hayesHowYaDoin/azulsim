@@ -6,7 +6,7 @@ RUN pip install poetry
 
 # [Optional] Install project dependencies using Poetry
 RUN poetry config virtualenvs.in-project true
-COPY ./pyproject.toml ./poetry.lock ./
+COPY ./pyproject.toml ./poetry.loc[k] ./
 RUN poetry install --no-ansi --no-interaction --no-root
 
 # Install make

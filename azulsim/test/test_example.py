@@ -4,7 +4,7 @@ test_example.py
 Defines tests for example functions in project template.
 """
 
-from python_template.example import add
+from azulsim.example import add
 
 
 def test_add():

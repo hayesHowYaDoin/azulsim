@@ -6,20 +6,6 @@ from .tiles import ColoredTile
 
 
 @dataclass(frozen=True)
-class TileBag:
-    """The tile bag from which colored tiles are drawn to fill the factory displays at the start of a round."""
-
-    tiles: tuple[ColoredTile, ...]
-
-
-@dataclass(frozen=True)
-class TileDiscard:
-    """The collection of colored tiles that have been discarded."""
-
-    tiles: tuple[ColoredTile, ...]
-
-
-@dataclass(frozen=True)
 class FactoryDisplay:
     """A single factory display."""
 

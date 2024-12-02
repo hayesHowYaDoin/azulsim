@@ -2,7 +2,7 @@ from azulsim.core import game
 
 
 def main() -> None:
-    state = game.GameState.default()
+    state = game.GameState.new(3)
     print(state)
 
 

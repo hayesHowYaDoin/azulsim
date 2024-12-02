@@ -1,4 +1,4 @@
-from typing import Optional, TypeAlias
+from typing import TypeAlias
 
 from pydantic.dataclasses import dataclass
 
@@ -7,9 +7,9 @@ from .tiles import ColoredTile
 
 @dataclass(frozen=True)
 class FactoryDisplay:
-    """A single factory display."""
+    """A factory display which contains a pot of tiles."""
 
-    tiles: Optional[tuple[ColoredTile, ColoredTile, ColoredTile, ColoredTile]]
+    tiles: tuple[ColoredTile, ColoredTile, ColoredTile, ColoredTile]
 
 
 @dataclass(frozen=True)

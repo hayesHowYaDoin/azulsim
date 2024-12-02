@@ -1,6 +1,6 @@
 from typing import TypeAlias
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.types import NonNegativeInt
 from pydantic.dataclasses import dataclass
 
@@ -41,12 +41,16 @@ def _build_default_pattern_lines() -> _PatternLinesType:
         )
     )
 
-    assert len(lines) == 5, "Pattern lines must"
+    assert (
+        len(lines) == 5
+    ), "A board's pattern lines section must have five pattern lines."
     return lines
 
 
 class PatternLines(BaseModel):
     """The pattern lines section of a board."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     lines: _PatternLinesType = Field(default=_build_default_pattern_lines())
 

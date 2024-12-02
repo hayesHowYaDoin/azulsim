@@ -1,3 +1,5 @@
+"""Defines representation of a game board and its subsections."""
+
 from .board import *  # noqa: F403
 from .floor import *  # noqa: F403
 from .pattern import *  # noqa: F403

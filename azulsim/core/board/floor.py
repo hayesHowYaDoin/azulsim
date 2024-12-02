@@ -1,3 +1,5 @@
+"""Defines the floor line section of a game board."""
+
 from annotated_types import Ge, Le
 from itertools import islice
 from typing import Annotated

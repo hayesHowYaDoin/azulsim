@@ -1,3 +1,5 @@
+"""Defines the encapsulation of game state."""
+
 from __future__ import annotations
 from collections import deque
 
@@ -11,7 +13,7 @@ from ..factory import FactoryDisplay, TableCenter
 
 @dataclass
 class GameState:
-    """Aggregation of the game state."""
+    """Aggregation of game state."""
 
     boards: deque[Board]
     factory_displays: set[FactoryDisplay]

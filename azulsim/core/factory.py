@@ -1,3 +1,4 @@
+"""Defines representations of tile pools from which a player can pick from."""
 from typing import TypeAlias
 
 from pydantic.dataclasses import dataclass

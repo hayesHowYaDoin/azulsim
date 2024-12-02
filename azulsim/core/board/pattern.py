@@ -1,3 +1,5 @@
+"""Defines the pattern line section of a game board."""
+
 from typing import TypeAlias
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator

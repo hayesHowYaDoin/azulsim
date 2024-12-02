@@ -1,3 +1,5 @@
+"""Defines the wall section of a game board."""
+
 from __future__ import annotations
 from collections import deque
 from itertools import cycle, islice

@@ -1,3 +1,4 @@
+"""Defines representations of game tiles."""
 from enum import auto, Enum
 from typing import TypeAlias
 

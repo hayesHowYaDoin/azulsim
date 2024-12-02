@@ -1,3 +1,5 @@
+"""Defines the score section of a game board."""
+
 from typing import TypeAlias
 
 from pydantic.types import PositiveInt

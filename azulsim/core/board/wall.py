@@ -80,7 +80,7 @@ class WallRow:
 
         tiles = tuple(islice(row_sequence, 5))
         assert len(tiles) == 5, "Number of tiles in a wall row must be 5."
-        return WallRow.new(tiles)
+        return WallRow(tiles=tiles)
 
     @field_validator("tiles")
     @classmethod

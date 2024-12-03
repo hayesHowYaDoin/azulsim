@@ -25,7 +25,7 @@ in a Dev Container.
 
 1) Clone the repository onto the host computer with the following command:
    ```
-    git clone https://github.com/hayesHowYaDoin/physics_backend.git
+    git clone https://github.com/hayesHowYaDoin/azulsim.git
    ```
 2) Open the folder in VSCode. In the Command Palette (Ctrl+Shift+P), execute 
 the command "Dev Containers: Open Folder In Container..."

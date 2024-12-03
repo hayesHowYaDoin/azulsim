@@ -24,6 +24,7 @@ class FactoryOfferSelection:
     pattern_line_number: PositiveInt
 
 
+# TODO: To be used in factory offer phase when implemented
 def _rotate_turn_order(players: deque[Board], first: Board) -> deque[Board]:  # type: ignore
     if len(players) == 0:
         raise ValueError("Players object contains no players.")

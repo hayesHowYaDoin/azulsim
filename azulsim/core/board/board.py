@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic.dataclasses import dataclass
 
 from .scoring import GameScore
 from .pattern import PatternLines
@@ -10,10 +10,20 @@ from .floor import FloorLine
 from .wall import Wall
 
 
-class Board(BaseModel):
+@dataclass(frozen=True, kw_only=True)
+class Board:
     """A player board in a game."""
 
-    score_track: GameScore = Field(default=0)
-    pattern_lines: PatternLines = Field(default=PatternLines())
-    floor_line: FloorLine = Field(default=FloorLine())
-    wall: Wall = Field(default=Wall())
+    score_track: GameScore
+    pattern_lines: PatternLines
+    floor_line: FloorLine
+    wall: Wall
+
+    @staticmethod
+    def default() -> Board:
+        return Board(
+            score_track=0,
+            pattern_lines=PatternLines.default(),
+            floor_line=FloorLine.default(),
+            wall=Wall.default(),
+        )

@@ -2,8 +2,8 @@
 
 from typing import TypeAlias
 
-from pydantic.types import PositiveInt
+from pydantic.types import NonNegativeInt
 
 
 """The score for a board in a game."""
-GameScore: TypeAlias = PositiveInt
+GameScore: TypeAlias = NonNegativeInt

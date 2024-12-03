@@ -41,7 +41,12 @@ _ALL_COLORED_TILES = (
 class TileBag:
     """The tile bag from which colored tiles are drawn to fill the factory displays at the start of a round."""
 
-    tiles: tuple[ColoredTile, ...] = _ALL_COLORED_TILES
+    tiles: tuple[ColoredTile, ...]
+
+    @staticmethod
+    def default() -> TileBag:
+        """Returns a tile bag in its default state with all colored tiles in the game."""
+        return TileBag(tiles=_ALL_COLORED_TILES)
 
     @staticmethod
     def new(tiles: Iterable[ColoredTile]) -> TileBag:
@@ -65,7 +70,7 @@ class TileBag:
         return selected_tile, TileBag(tiles=tuple(remaining_tiles))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class TileDiscard:
     """The collection of colored tiles that have been discarded."""
 

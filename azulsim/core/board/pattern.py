@@ -1,8 +1,9 @@
 """Defines the pattern line section of a game board."""
 
+from __future__ import annotations
 from typing import TypeAlias
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import ConfigDict, field_validator
 from pydantic.types import NonNegativeInt
 from pydantic.dataclasses import dataclass
 
@@ -15,12 +16,19 @@ class EmptyPatternLine:
     pass
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PopulatedPatternLine:
     """A pattern line with tiles."""
 
-    num_tiles: NonNegativeInt
+    tile_count: NonNegativeInt
     color: ColoredTile
+
+    @staticmethod
+    def new(
+        tile_count: NonNegativeInt, color: ColoredTile
+    ) -> PopulatedPatternLine:
+        """Returns a populated pattern line with the provided tile count and color."""
+        return PopulatedPatternLine(tile_count=tile_count, color=color)
 
 
 """A pattern line in the pattern lines section of a board."""
@@ -49,12 +57,23 @@ def _build_default_pattern_lines() -> _PatternLinesType:
     return lines
 
 
-class PatternLines(BaseModel):
+@dataclass(
+    frozen=True, kw_only=True, config=ConfigDict(arbitrary_types_allowed=True)
+)
+class PatternLines:
     """The pattern lines section of a board."""
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    lines: _PatternLinesType
 
-    lines: _PatternLinesType = Field(default=_build_default_pattern_lines())
+    @staticmethod
+    def default() -> PatternLines:
+        """Returns a pattern lines object with empty pattern lines."""
+        return PatternLines(lines=_build_default_pattern_lines())
+
+    @staticmethod
+    def new(lines: _PatternLinesType) -> PatternLines:
+        """Returns a pattern lines object with the provided pattern lines."""
+        return PatternLines(lines=lines)
 
     @field_validator("lines")
     @classmethod
@@ -74,9 +93,9 @@ class PatternLines(BaseModel):
     def _validate_line(line: PatternLine, max_tiles: int) -> PatternLine:
         match line:
             case PopulatedPatternLine():
-                if line.num_tiles > max_tiles:
+                if line.tile_count > max_tiles:
                     raise ValueError(
-                        f"Number of tiles exceeded maximum for line: {line.num_tiles} > {max_tiles}"
+                        f"Number of tiles exceeded maximum for line: {line.tile_count} > {max_tiles}"
                     )
             case EmptyPatternLine():
                 pass

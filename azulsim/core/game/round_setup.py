@@ -44,7 +44,7 @@ def round_setup(
     return GameState(
         boards=deque(boards),
         factory_displays=factory_displays,
-        table_center=UnpickedTableCenter(),
+        table_center=UnpickedTableCenter.default(),
         bag=bag,
         discard=discard,
     )

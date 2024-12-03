@@ -25,5 +25,5 @@ class GameState:
     def new(player_count: PositiveInt) -> GameState:
         from .round_setup import round_setup
 
-        boards = deque([Board()] * player_count)
-        return round_setup(boards, TileBag(), TileDiscard())
+        boards = deque([Board.default()] * player_count)
+        return round_setup(boards, TileBag.default(), TileDiscard())

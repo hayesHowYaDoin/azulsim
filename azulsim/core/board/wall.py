@@ -5,7 +5,7 @@ from collections import deque
 from itertools import cycle, islice
 from typing import Generator, TypeAlias
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import field_validator
 from pydantic.dataclasses import dataclass
 
 from ..tiles import ColoredTile
@@ -17,12 +17,22 @@ class EmptyWallSpace:
 
     color: ColoredTile
 
+    @staticmethod
+    def new(color: ColoredTile) -> EmptyWallSpace:
+        """Returns an empty wall space object with the provided tile color."""
+        return EmptyWallSpace(color=color)
+
 
 @dataclass(frozen=True)
 class PopulatedWallSpace:
     """A space in the wall section of a board which occupied."""
 
     color: ColoredTile
+
+    @staticmethod
+    def new(color: ColoredTile) -> PopulatedWallSpace:
+        """Returns a populated wall space object with the provided tile color."""
+        return PopulatedWallSpace(color=color)
 
 
 """A space in the wall section of a board."""
@@ -61,7 +71,8 @@ class WallRow:
     tiles: _WallRowTilesType
 
     @staticmethod
-    def default_from_leftmost(leftmost_color: ColoredTile) -> WallRow:
+    def new(leftmost_color: ColoredTile) -> WallRow:
+        """Returns a wall row starting from the provided leftmost color."""
         row_sequence = (
             EmptyWallSpace(tile) for tile in _wall_tile_sequence(leftmost_color)
         )
@@ -86,12 +97,7 @@ def _build_default_wall_rows() -> (
     tuple[WallRow, WallRow, WallRow, WallRow, WallRow]
 ):
     left_tile_sequence = _wall_tile_sequence(ColoredTile.BLUE)
-    rows = tuple(
-        (
-            WallRow.default_from_leftmost(next(left_tile_sequence))
-            for _ in range(5)
-        )
-    )
+    rows = tuple((WallRow.new(next(left_tile_sequence)) for _ in range(5)))
 
     assert len(rows) == 5, "Number of rows in a wall must be 5."
     return rows
@@ -100,10 +106,21 @@ def _build_default_wall_rows() -> (
 _WallRowsType: TypeAlias = tuple[WallRow, WallRow, WallRow, WallRow, WallRow]
 
 
-class Wall(BaseModel):
+@dataclass(frozen=True, kw_only=True)
+class Wall:
     """The wall section of a board."""
 
-    rows: _WallRowsType = Field(default=_build_default_wall_rows())
+    rows: _WallRowsType
+
+    @staticmethod
+    def default() -> Wall:
+        """Returns a wall with empty wall rows in the required pattern."""
+        return Wall(rows=_build_default_wall_rows())
+
+    @staticmethod
+    def new(rows: _WallRowsType) -> Wall:
+        """Returns a wall with the provided rows."""
+        return Wall(rows=rows)
 
     @field_validator("rows")
     @classmethod

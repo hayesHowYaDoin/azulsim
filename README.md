@@ -1,6 +1,6 @@
 # Python Project Template
 
-This project serves to model and simulate the board game [Azul][5]. The 
+This project serves to model and simulate the board game [Azul][5], the rulebook for which can be found [here][6]. The 
 original intent is for this simulation to be used to train bots to play the 
 game, but it could just as easily be used as a standalone game for 1-4 players. 
 All dependencies are managed through the [Poetry package manager][1], unit 
@@ -44,3 +44,4 @@ And... that's it!
 [3]: https://mypy-lang.org/
 [4]: https://docs.pytest.org/en/7.4.x/
 [5]: https://boardgamegeek.com/boardgame/230802/azul
+[6]: https://cdn.1j1ju.com/medias/03/14/fd-azul-rulebook.pdf

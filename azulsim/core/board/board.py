@@ -22,7 +22,7 @@ class Board:
     @staticmethod
     def default() -> Board:
         return Board(
-            score_track=0,
+            score_track=GameScore.default(),
             pattern_lines=PatternLines.default(),
             floor_line=FloorLine.default(),
             wall=Wall.default(),

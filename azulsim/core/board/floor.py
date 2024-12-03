@@ -6,7 +6,7 @@ from itertools import islice
 from typing import Annotated
 
 from pydantic.dataclasses import dataclass
-from pydantic.types import NegativeInt
+from pydantic.types import NegativeInt, PositiveInt
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -19,6 +19,10 @@ class FloorLine:
     def default() -> FloorLine:
         """Returns a floor line object with a tile count of zero."""
         return FloorLine(tile_count=0)
+
+    @staticmethod
+    def new(tile_count: PositiveInt) -> FloorLine:
+        return FloorLine(tile_count=tile_count)
 
 
 def calculate_penalty(floor_line: FloorLine) -> NegativeInt:

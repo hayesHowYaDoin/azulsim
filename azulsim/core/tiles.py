@@ -57,11 +57,20 @@ class TileBag:
         """Returns a discarded tile collection with the argument tiles appended."""
         return TileBag(tiles=self.tiles + tiles)
 
-    def pull_random(self) -> tuple[Optional[ColoredTile], TileBag]:
-        """Returns a number of randomly selected tiles from the tile bag with the modified tile bag."""
+    def pull_random(self, seed: int) -> tuple[Optional[ColoredTile], TileBag]:
+        """Returns a randomly selected tile from the tile bag with the modified tile bag.
+
+        Args:
+            seed: A seed for the random number generator.
+
+        Returns:
+            A randomly selected tile (if one exists) and the tile bag with the selected tile removed.
+        """
 
         if len(self.tiles) == 0:
             return None, self
+
+        random.seed(seed)
 
         selected_tile = random.sample(self.tiles, 1)[0]
         remaining_tiles = list(self.tiles)
@@ -74,7 +83,12 @@ class TileBag:
 class TileDiscard:
     """The collection of colored tiles that have been discarded."""
 
-    tiles: tuple[ColoredTile, ...] = ()
+    tiles: tuple[ColoredTile, ...]
+
+    @staticmethod
+    def default() -> TileDiscard:
+        """Returns a discarded tile collection with no tiles."""
+        return TileDiscard(tiles=())
 
     @staticmethod
     def new(tiles: Iterable[ColoredTile]) -> TileDiscard:
@@ -90,4 +104,4 @@ def reset_tile_bag(
     bag: TileBag, discard: TileDiscard
 ) -> tuple[TileBag, TileDiscard]:
     """Returns tile bag and discard with the discarded tiles moved back into the bag."""
-    return bag.add(discard.tiles), TileDiscard()
+    return bag.add(discard.tiles), TileDiscard.default()

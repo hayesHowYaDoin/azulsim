@@ -84,9 +84,9 @@ class PatternLines:
         return (
             cls._validate_line(lines[0], 1),
             cls._validate_line(lines[1], 2),
-            cls._validate_line(lines[1], 3),
-            cls._validate_line(lines[1], 4),
-            cls._validate_line(lines[1], 5),
+            cls._validate_line(lines[2], 3),
+            cls._validate_line(lines[3], 4),
+            cls._validate_line(lines[4], 5),
         )
 
     @staticmethod

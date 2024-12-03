@@ -15,7 +15,7 @@ from ..factory import (
 from ..tiles import ColoredTile
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FactoryOfferSelection:
     """A valid move for a player to take during the factory offer phase."""
 

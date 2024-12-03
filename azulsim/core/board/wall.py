@@ -11,7 +11,7 @@ from pydantic.dataclasses import dataclass
 from ..tiles import ColoredTile
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class EmptyWallSpace:
     """A space in the wall section of a board which unoccupied."""
 
@@ -23,7 +23,7 @@ class EmptyWallSpace:
         return EmptyWallSpace(color=color)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PopulatedWallSpace:
     """A space in the wall section of a board which occupied."""
 
@@ -64,7 +64,7 @@ _WallRowTilesType: TypeAlias = tuple[
 ]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class WallRow:
     """A row in the wall section of a board."""
 
@@ -74,12 +74,13 @@ class WallRow:
     def new(leftmost_color: ColoredTile) -> WallRow:
         """Returns a wall row starting from the provided leftmost color."""
         row_sequence = (
-            EmptyWallSpace(tile) for tile in _wall_tile_sequence(leftmost_color)
+            EmptyWallSpace.new(tile)
+            for tile in _wall_tile_sequence(leftmost_color)
         )
 
         tiles = tuple(islice(row_sequence, 5))
         assert len(tiles) == 5, "Number of tiles in a wall row must be 5."
-        return WallRow(tiles)
+        return WallRow.new(tiles)
 
     @field_validator("tiles")
     @classmethod

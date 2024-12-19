@@ -90,6 +90,14 @@ class PickedTableCenter:
             tiles=tuple(tile for tile in self.tiles if tile != color)
         )
 
+    def add(self, tiles: Iterable[ColoredTile]) -> PickedTableCenter:
+        """Returns a picked table center with the given tiles added to the pool."""
+        return PickedTableCenter(tiles=self.tiles + tuple(tiles))
+
+    def empty(self) -> bool:
+        """Returns a boolean representing if the collection is empty."""
+        return len(self.tiles) == 0
+
 
 @dataclass(frozen=True, kw_only=True)
 class UnpickedTableCenter:
@@ -116,6 +124,14 @@ class UnpickedTableCenter:
         return PickedTableCenter(
             tiles=tuple(tile for tile in self.tiles if tile != color)
         )
+
+    def add(self, tiles: Iterable[ColoredTile]) -> UnpickedTableCenter:
+        """Returns a picked table center with the given tiles added to the pool."""
+        return UnpickedTableCenter(tiles=self.tiles + tuple(tiles))
+
+    def empty(self) -> bool:
+        """Returns a boolean representing if the collection is empty."""
+        return len(self.tiles) == 0
 
 
 """The pot of tiles in the center of the table."""

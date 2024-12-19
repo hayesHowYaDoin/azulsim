@@ -4,21 +4,32 @@ from azulsim.core import game
 def main() -> None:
     state = game.GameState.new(player_count=3, seed=42)
 
-    while len(state.factory_displays) != 0:
-        print("Select a factory display:")
+    while not game.factory_offer.phase_end(
+        state.factory_displays, state.table_center
+    ):
         factories = state.factory_displays.factories
-        for num, display in enumerate(factories):
-            print(f"\t{num}: {display}")
+        table_center = state.table_center
+        print("Select a tile pool:")
+        print(f"\t0: {table_center}")
+        for num, factory in enumerate(factories):
+            print(f"\t{num+1}: {factory}")
 
         selected_number = int(input("Selection: "))
-        if 0 <= selected_number < len(state.factory_displays):
-            print(f"You selected: {factories[selected_number]}")
+        if (
+            selected_number < 0
+            or len(state.factory_displays) + 1 < selected_number
+        ):
+            print("Invalid selection.")
+            continue
+
+        if selected_number == 0:
+            selected_pool = table_center
         else:
-            print("Invalid display number.")
-        selected_display = factories[selected_number]
+            selected_pool = factories[selected_number - 1]
+        print(f"You selected: {table_center}")
 
         print("Select tile color:")
-        unique_colors = list(set(selected_display.tiles))
+        unique_colors = list(set(selected_pool.tiles))
         for num, tile_color in enumerate(unique_colors):
             print(f"\t{num}: {tile_color}")
 
@@ -32,14 +43,14 @@ def main() -> None:
         result = game.factory_offer.select_tiles(
             state.factory_displays,
             state.table_center,
-            selected_display,
+            selected_pool,
             selected_color,
         )
         if result is not None:
             state = game.GameState(
                 boards=state.boards,
-                factory_displays=result[0],
-                table_center=result[1],
+                factory_displays=result[1],
+                table_center=result[2],
                 bag=state.bag,
                 discard=state.discard,
             )

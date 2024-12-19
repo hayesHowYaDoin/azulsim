@@ -37,7 +37,7 @@ _ALL_COLORED_TILES = (
 )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class TileBag:
     """The tile bag from which colored tiles are drawn to fill the factory displays at the start of a round."""
 

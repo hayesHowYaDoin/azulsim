@@ -1,7 +1,7 @@
 """Contains unit tests for the azulsim.core.board.floor module."""
 
 import pytest
-from azulsim.core.board.floor import FloorLine, calculate_penalty
+from azulsim.core.board.floor import FloorLine, calculate_floor_penalty
 from pydantic import ValidationError
 
 
@@ -23,8 +23,8 @@ def test_floor_line_invalid_tile_count() -> None:
         FloorLine.new(tile_count=8)
 
 
-def test_calculate_penalty() -> None:
+def test_calculate_floor_penalty() -> None:
     penalties = [0, -1, -2, -4, -6, -8, -11, -14]
     for count in range(8):
         floor_line = FloorLine.new(tile_count=count)
-        assert calculate_penalty(floor_line) == penalties[count]
+        assert calculate_floor_penalty(floor_line) == penalties[count]

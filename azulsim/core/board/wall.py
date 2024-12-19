@@ -71,7 +71,7 @@ class WallLine:
     tiles: _WallLineTilesType
 
     @staticmethod
-    def default(leftmost_color: ColoredTile) -> WallLine:
+    def from_leftmost(leftmost_color: ColoredTile) -> WallLine:
         """Returns a wall line starting from the provided leftmost color."""
         row_sequence = (
             EmptyWallSpace.new(tile)
@@ -117,7 +117,9 @@ def _build_default_wall_rows() -> (
     tuple[WallLine, WallLine, WallLine, WallLine, WallLine]
 ):
     left_tile_sequence = _wall_tile_sequence(ColoredTile.BLUE)
-    rows = tuple((WallLine.default(next(left_tile_sequence)) for _ in range(5)))
+    rows = tuple(
+        (WallLine.from_leftmost(next(left_tile_sequence)) for _ in range(5))
+    )
 
     assert len(rows) == 5, "Number of rows in a wall must be 5."
     return rows
@@ -148,13 +150,13 @@ class Wall:
     def line_count() -> PositiveInt:
         return 5
 
-    @field_validator("rows")
+    @field_validator("lines")
     @classmethod
-    def _validate_rows(cls, rows: _WallLinesType) -> _WallLinesType:
-        row_start_colors = [row.tiles[0].color for row in rows]
-        valid_colors = _wall_tile_sequence(row_start_colors[0])
-        for color, valid_color in zip(row_start_colors, valid_colors):
+    def _validate_lines(cls, lines: _WallLinesType) -> _WallLinesType:
+        line_start_colors = [line.tiles[0].color for line in lines]
+        valid_colors = _wall_tile_sequence(line_start_colors[0])
+        for color, valid_color in zip(line_start_colors, valid_colors):
             if color != valid_color:
-                raise ValueError("Colors for rows must follow wall sequence.")
+                raise ValueError("Colors for lines must follow wall sequence.")
 
-        return rows
+        return lines

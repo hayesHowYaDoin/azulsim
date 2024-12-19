@@ -1,4 +1,5 @@
 """Defines representations of tile pools from which a player can pick from."""
+
 from __future__ import annotations
 from typing import Sequence, TypeAlias
 

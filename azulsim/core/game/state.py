@@ -3,13 +3,12 @@
 from __future__ import annotations
 from collections import deque
 import random
-from typing import Sequence
 
 from pydantic import PositiveInt
 from pydantic.dataclasses import dataclass
 
 from ..board import Board
-from ..factory import FactoryDisplay, TableCenter
+from ..factory import FactoryDisplays, TableCenter
 from ..tiles import TileBag, TileDiscard
 
 
@@ -18,7 +17,7 @@ class GameState:
     """Aggregation of game state."""
 
     boards: deque[Board]
-    factory_displays: Sequence[FactoryDisplay]
+    factory_displays: FactoryDisplays
     table_center: TableCenter
     bag: TileBag
     discard: TileDiscard

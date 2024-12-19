@@ -5,7 +5,7 @@ from typing import Callable, Sequence
 
 from .state import GameState
 from ..board import Board
-from ..factory import FactoryDisplay, UnpickedTableCenter
+from ..factory import FactoryDisplay, FactoryDisplays, UnpickedTableCenter
 from ..tiles import ColoredTile, TileBag, TileDiscard, reset_tile_bag
 
 
@@ -46,7 +46,7 @@ def round_setup(
 
     return GameState(
         boards=deque(boards),
-        factory_displays=factory_displays,
+        factory_displays=FactoryDisplays.new(factory_displays),
         table_center=UnpickedTableCenter.default(),
         bag=bag,
         discard=discard,

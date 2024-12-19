@@ -1,16 +1,19 @@
 """Defines the factory offer phase."""
 
 from collections import deque
-from typing import Callable, Sequence
+from typing import Optional, Sequence
 
 from pydantic.dataclasses import dataclass
 from pydantic.types import PositiveInt
 
-from .state import GameState
 from ..board import Board
 from ..factory import (
     FactoryDisplay,
+    FactoryDisplays,
+    PickedTableCenter,
+    UnpickedTableCenter,
     TableCenter,
+    PickableTilePool,
 )
 from ..tiles import ColoredTile
 
@@ -37,15 +40,24 @@ def _rotate_turn_order(players: deque[Board], first: Board) -> deque[Board]:  # 
     return players
 
 
-def factory_offer(
-    state: GameState,
-    _board: Board,
-    _pick_strategy: Callable[[GameState, Board], FactoryOfferSelection],
-) -> GameState:
-    return state
+def select_tiles(
+    factories: FactoryDisplays,
+    table_center: TableCenter,
+    tile_pool: PickableTilePool,
+    color: ColoredTile,
+) -> Optional[tuple[FactoryDisplays, TableCenter]]:
+    match tile_pool:
+        case FactoryDisplay():
+            if tile_pool in factories and tile_pool.count(color) != 0:
+                factories = factories.remove(tile_pool)
+        case PickedTableCenter() | UnpickedTableCenter():
+            if tile_pool.count(color) != 0:
+                table_center = table_center.pick(color)
+
+    return factories, table_center
 
 
-def factory_offer_end(
+def phase_end(
     factory_displays: Sequence[FactoryDisplay], table_center: TableCenter
 ) -> bool:
     return False

@@ -1,8 +1,5 @@
 """Contains unit tests for the azulsim.core.tiles module."""
 
-import random
-
-from azulsim.core.random import RandomState
 from azulsim.core.tiles import (
     ColoredTile,
     TileBag,

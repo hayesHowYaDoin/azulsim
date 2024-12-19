@@ -57,12 +57,12 @@ class TileBag:
         return TileBag(tiles=self.tiles + tiles)
 
     def pull(
-        self, random_strategy: Callable[[Sequence[ColoredTile]], ColoredTile]
+        self, selection_strategy: Callable[[Sequence[ColoredTile]], ColoredTile]
     ) -> tuple[Optional[ColoredTile], TileBag]:
         """Returns a tile from the tile bag selected with the provided strategy and the modified tile bag.
 
         Args:
-            random_strategy: Invocable function for selecting a tile.
+            selection_strategy: Invocable function for selecting a tile.
 
         Returns:
             The selected tile (if one exists) and the tile bag with the selected tile removed.
@@ -70,7 +70,7 @@ class TileBag:
         if len(self.tiles) == 0:
             return None, self
 
-        selected_tile = random_strategy(self.tiles)
+        selected_tile = selection_strategy(self.tiles)
         remaining_tiles = list(self.tiles)
         remaining_tiles.remove(selected_tile)
 

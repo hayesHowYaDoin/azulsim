@@ -16,12 +16,12 @@ from ..board import (
 
 
 def _tile_wall(board: Board) -> Board:
-    for line_number, pattern_line in enumerate(board.pattern_lines.lines):
+    for line_number, pattern_line in enumerate(board.pattern_lines):
         if (
             isinstance(pattern_line, PopulatedPatternLine)
             and pattern_line.tile_count == line_number
         ):
-            wall_line = board.wall.lines[line_number]
+            wall_line = board.wall[line_number]
             wall_line.populate_tile(color=pattern_line.color)
 
     return board
@@ -38,8 +38,8 @@ def _score_board(previous: Board, current: Board) -> Board:
     earned_score = 0
     for line_index in range(Wall.line_count()):
         for tile_index in range(WallLine.tile_count()):
-            previous_tile = previous.wall.lines[line_index].tiles[tile_index]
-            current_tile = current.wall.lines[line_index].tiles[tile_index]
+            previous_tile = previous.wall[line_index].tiles[tile_index]
+            current_tile = current.wall[line_index].tiles[tile_index]
             if isinstance(current_tile, PopulatedWallSpace) and isinstance(
                 previous_tile, EmptyWallSpace
             ):

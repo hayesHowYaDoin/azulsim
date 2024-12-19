@@ -5,7 +5,7 @@ from collections import deque
 from itertools import cycle, islice
 from typing import Generator, Iterable, TypeAlias
 
-from pydantic import field_validator, PositiveInt
+from pydantic import field_validator, PositiveInt, NonNegativeInt
 from pydantic.dataclasses import dataclass
 
 from ..tiles import ColoredTile
@@ -149,6 +149,14 @@ class Wall:
     @staticmethod
     def line_count() -> PositiveInt:
         return 5
+
+    def __iter__(self) -> Generator[WallLine, None, None]:
+        """Returns a generator for iterating through the wall lines."""
+        return (line for line in self.lines)
+
+    def __getitem__(self, key: NonNegativeInt) -> WallLine:
+        """Returns the wall line at the provided index key."""
+        return self.lines[key]
 
     @field_validator("lines")
     @classmethod

@@ -7,6 +7,7 @@ import random
 from pydantic import PositiveInt
 from pydantic.dataclasses import dataclass
 
+from .round_setup import round_setup
 from ..board import Board
 from ..factory import FactoryDisplays, TableCenter
 from ..tiles import TileBag, TileDiscard
@@ -33,14 +34,20 @@ class GameState:
         Returns:
             A constructed game state object.
         """
-        from .round_setup import round_setup
-
         random.seed(seed)
 
         boards = deque([Board.default()] * player_count)
-        return round_setup(
+        boards, factory_displays, table_center, bag, discard = round_setup(
             boards,
             TileBag.default(),
             TileDiscard.default(),
-            random_strategy=lambda x: random.sample(x, 1)[0],
+            selection_strategy=lambda x: random.sample(x, 1)[0],
+        )
+
+        return GameState(
+            boards=boards,
+            factory_displays=factory_displays,
+            table_center=table_center,
+            bag=bag,
+            discard=discard,
         )

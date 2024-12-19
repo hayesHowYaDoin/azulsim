@@ -22,7 +22,9 @@ class FactoryDisplay:
             raise ValueError("FactoryDisplay must contain 4 tiles.")
 
         tiles_tuple = tuple(tiles)
-        assert len(tiles_tuple) == 4
+        assert (
+            len(tiles_tuple) == 4
+        ), "Number of tiles in a factory display must be 4."
 
         return FactoryDisplay(tiles=tiles_tuple)
 

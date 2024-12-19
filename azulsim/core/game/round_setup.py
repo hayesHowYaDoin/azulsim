@@ -3,7 +3,6 @@
 from collections import deque
 from typing import Callable, Sequence
 
-from .state import GameState
 from ..board import Board
 from ..factory import FactoryDisplay, FactoryDisplays, UnpickedTableCenter
 from ..tiles import ColoredTile, TileBag, TileDiscard, reset_tile_bag
@@ -14,7 +13,9 @@ def round_setup(
     bag: TileBag,
     discard: TileDiscard,
     selection_strategy: Callable[[Sequence[ColoredTile]], ColoredTile],
-) -> GameState:
+) -> tuple[
+    deque[Board], FactoryDisplays, UnpickedTableCenter, TileBag, TileDiscard
+]:
     """Initializes necessary components to start a round of the game.
 
     Args:
@@ -45,10 +46,10 @@ def round_setup(
 
         factory_displays.append(FactoryDisplay(tiles=tiles))
 
-    return GameState(
-        boards=deque(boards),
-        factory_displays=FactoryDisplays.new(factory_displays),
-        table_center=UnpickedTableCenter.default(),
-        bag=bag,
-        discard=discard,
+    return (
+        deque(boards),
+        FactoryDisplays.new(factory_displays),
+        UnpickedTableCenter.default(),
+        bag,
+        discard,
     )

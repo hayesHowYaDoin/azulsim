@@ -1,8 +1,10 @@
+from collections import deque
+
 from azulsim.core import game
 
 
 def main() -> None:
-    state = game.GameState.new(player_count=3, seed=42)
+    state = game.GameState.new(player_count=1, seed=42)
 
     while not game.factory_offer.phase_end(
         state.factory_displays, state.table_center
@@ -46,14 +48,46 @@ def main() -> None:
             selected_pool,
             selected_color,
         )
-        if result is not None:
-            state = game.GameState(
-                boards=state.boards,
-                factory_displays=result[1],
-                table_center=result[2],
-                bag=state.bag,
-                discard=state.discard,
-            )
+        if result is None:
+            print("Encountered weird error.")
+            continue
+
+        tiles, factories, table_center = result
+
+        print("Select pattern line:")
+        board = state.boards[0]
+        for num, line in enumerate(board.pattern_lines):
+            print(f"{num}: {line}")
+
+        selected_line_index = int(input("Selection: "))
+        if (
+            selected_line_index < 0
+            or len(board.pattern_lines.lines) + 1 < selected_line_index
+        ):
+            print("Invalid selection.")
+            continue
+
+        board = game.factory_offer.place_tiles(
+            board,
+            selected_line_index,
+            tiles,
+        )
+        if board is None:
+            print("Weird error encountered...")
+            continue
+
+        print("Board state:")
+        for line in board.pattern_lines:
+            print(line)
+        print(board.floor_line)
+
+        state = game.GameState(
+            boards=deque([board]),
+            factory_displays=factories,
+            table_center=table_center,
+            bag=state.bag,
+            discard=state.discard,
+        )
 
 
 if __name__ == "__main__":

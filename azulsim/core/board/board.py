@@ -21,9 +21,25 @@ class Board:
 
     @staticmethod
     def default() -> Board:
+        """Returns a board with defaulted sections."""
         return Board(
             score_track=GameScore.default(),
             pattern_lines=PatternLines.default(),
             floor_line=FloorLine.default(),
             wall=Wall.default(),
+        )
+
+    @staticmethod
+    def new(
+        score_track: GameScore,
+        pattern_lines: PatternLines,
+        floor_line: FloorLine,
+        wall: Wall,
+    ) -> Board:
+        """Returns a board with the argument sections."""
+        return Board(
+            score_track=score_track,
+            pattern_lines=pattern_lines,
+            floor_line=floor_line,
+            wall=wall,
         )

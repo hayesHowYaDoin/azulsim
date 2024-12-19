@@ -5,7 +5,7 @@ import pytest
 from azulsim.core.board.wall import (
     EmptyWallSpace,
     PopulatedWallSpace,
-    WallRow,
+    WallLine,
     Wall,
 )
 from azulsim.core.tiles import ColoredTile
@@ -24,7 +24,7 @@ def test_populated_wall_space_new():
 
 
 def test_wall_row_new():
-    wall_row = WallRow.new(leftmost_color=ColoredTile.YELLOW)
+    wall_row = WallLine.default(leftmost_color=ColoredTile.YELLOW)
     assert len(wall_row.tiles) == 5
     assert wall_row.tiles[0].color == ColoredTile.YELLOW
     assert wall_row.tiles[1].color == ColoredTile.RED
@@ -35,40 +35,40 @@ def test_wall_row_new():
 
 def test_wall_default():
     wall = Wall.default()
-    assert len(wall.rows) == 5
-    assert wall.rows[0].tiles[0].color == ColoredTile.BLUE
-    assert wall.rows[1].tiles[0].color == ColoredTile.YELLOW
-    assert wall.rows[2].tiles[0].color == ColoredTile.RED
-    assert wall.rows[3].tiles[0].color == ColoredTile.BLACK
-    assert wall.rows[4].tiles[0].color == ColoredTile.WHITE
+    assert len(wall.lines) == 5
+    assert wall.lines[0].tiles[0].color == ColoredTile.BLUE
+    assert wall.lines[1].tiles[0].color == ColoredTile.YELLOW
+    assert wall.lines[2].tiles[0].color == ColoredTile.RED
+    assert wall.lines[3].tiles[0].color == ColoredTile.BLACK
+    assert wall.lines[4].tiles[0].color == ColoredTile.WHITE
 
 
 def test_wall_new() -> None:
     wall = Wall.new(
         (
-            WallRow.new(ColoredTile.BLACK),
-            WallRow.new(ColoredTile.WHITE),
-            WallRow.new(ColoredTile.BLUE),
-            WallRow.new(ColoredTile.YELLOW),
-            WallRow.new(ColoredTile.RED),
+            WallLine.default(ColoredTile.BLACK),
+            WallLine.default(ColoredTile.WHITE),
+            WallLine.default(ColoredTile.BLUE),
+            WallLine.default(ColoredTile.YELLOW),
+            WallLine.default(ColoredTile.RED),
         )
     )
-    assert len(wall.rows) == 5
-    assert wall.rows[0].tiles[0].color == ColoredTile.BLACK
-    assert wall.rows[1].tiles[0].color == ColoredTile.WHITE
-    assert wall.rows[2].tiles[0].color == ColoredTile.BLUE
-    assert wall.rows[3].tiles[0].color == ColoredTile.YELLOW
-    assert wall.rows[4].tiles[0].color == ColoredTile.RED
+    assert len(wall.lines) == 5
+    assert wall.lines[0].tiles[0].color == ColoredTile.BLACK
+    assert wall.lines[1].tiles[0].color == ColoredTile.WHITE
+    assert wall.lines[2].tiles[0].color == ColoredTile.BLUE
+    assert wall.lines[3].tiles[0].color == ColoredTile.YELLOW
+    assert wall.lines[4].tiles[0].color == ColoredTile.RED
 
 
 def test_wall_invalid_row_sequence():
     with pytest.raises(ValueError):
         Wall(
-            rows=(
-                WallRow.new(ColoredTile.BLUE),
-                WallRow.new(ColoredTile.RED),
-                WallRow.new(ColoredTile.YELLOW),
-                WallRow.new(ColoredTile.BLACK),
-                WallRow.new(ColoredTile.WHITE),
+            lines=(
+                WallLine.default(ColoredTile.BLUE),
+                WallLine.default(ColoredTile.RED),
+                WallLine.default(ColoredTile.YELLOW),
+                WallLine.default(ColoredTile.BLACK),
+                WallLine.default(ColoredTile.WHITE),
             )
         )

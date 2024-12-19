@@ -25,7 +25,7 @@ class FloorLine:
         return FloorLine(tile_count=tile_count)
 
 
-def calculate_penalty(floor_line: FloorLine) -> NegativeInt:
+def calculate_floor_penalty(floor_line: FloorLine) -> NegativeInt:
     """Returns the calculated penalty for the contents of a floor line."""
     penalties = (-1, -1, -2, -2, -2, -3, -3)
     return sum(islice(penalties, floor_line.tile_count))

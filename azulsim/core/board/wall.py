@@ -3,9 +3,9 @@
 from __future__ import annotations
 from collections import deque
 from itertools import cycle, islice
-from typing import Generator, TypeAlias
+from typing import Generator, Iterable, TypeAlias
 
-from pydantic import field_validator
+from pydantic import field_validator, PositiveInt
 from pydantic.dataclasses import dataclass
 
 from ..tiles import ColoredTile
@@ -59,32 +59,51 @@ def _wall_tile_sequence(
         yield color
 
 
-_WallRowTilesType: TypeAlias = tuple[
+_WallLineTilesType: TypeAlias = tuple[
     WallSpace, WallSpace, WallSpace, WallSpace, WallSpace
 ]
 
 
 @dataclass(frozen=True, kw_only=True)
-class WallRow:
-    """A row in the wall section of a board."""
+class WallLine:
+    """A line in the wall section of a board."""
 
-    tiles: _WallRowTilesType
+    tiles: _WallLineTilesType
 
     @staticmethod
-    def new(leftmost_color: ColoredTile) -> WallRow:
-        """Returns a wall row starting from the provided leftmost color."""
+    def default(leftmost_color: ColoredTile) -> WallLine:
+        """Returns a wall line starting from the provided leftmost color."""
         row_sequence = (
             EmptyWallSpace.new(tile)
             for tile in _wall_tile_sequence(leftmost_color)
         )
 
-        tiles = tuple(islice(row_sequence, 5))
+        tiles = tuple(islice(row_sequence, WallLine.tile_count()))
         assert len(tiles) == 5, "Number of tiles in a wall row must be 5."
-        return WallRow(tiles=tiles)
+        return WallLine(tiles=tiles)
+
+    @staticmethod
+    def new(tiles: Iterable[WallSpace]) -> WallLine:
+        return WallLine(tiles=_WallLineTilesType(tiles))
+
+    @staticmethod
+    def tile_count() -> PositiveInt:
+        return 5
+
+    def populate_tile(self, color: ColoredTile) -> WallLine:
+        """Returns a wall line with the space of the argument color added."""
+        tiles: list[WallSpace] = []
+        for tile in self.tiles:
+            if tile.color != color:
+                tiles.append(tile)
+            else:
+                tiles.append(PopulatedWallSpace(color=color))
+
+        return WallLine.new(tiles)
 
     @field_validator("tiles")
     @classmethod
-    def _validate_tiles(cls, tiles: _WallRowTilesType) -> _WallRowTilesType:
+    def _validate_tiles(cls, tiles: _WallLineTilesType) -> _WallLineTilesType:
         row_colors = [tile.color for tile in tiles]
         valid_colors = _wall_tile_sequence(row_colors[0])
         for color, valid_color in zip(row_colors, valid_colors):
@@ -95,37 +114,43 @@ class WallRow:
 
 
 def _build_default_wall_rows() -> (
-    tuple[WallRow, WallRow, WallRow, WallRow, WallRow]
+    tuple[WallLine, WallLine, WallLine, WallLine, WallLine]
 ):
     left_tile_sequence = _wall_tile_sequence(ColoredTile.BLUE)
-    rows = tuple((WallRow.new(next(left_tile_sequence)) for _ in range(5)))
+    rows = tuple((WallLine.default(next(left_tile_sequence)) for _ in range(5)))
 
     assert len(rows) == 5, "Number of rows in a wall must be 5."
     return rows
 
 
-_WallRowsType: TypeAlias = tuple[WallRow, WallRow, WallRow, WallRow, WallRow]
+_WallLinesType: TypeAlias = tuple[
+    WallLine, WallLine, WallLine, WallLine, WallLine
+]
 
 
 @dataclass(frozen=True, kw_only=True)
 class Wall:
     """The wall section of a board."""
 
-    rows: _WallRowsType
+    lines: _WallLinesType
 
     @staticmethod
     def default() -> Wall:
         """Returns a wall with empty wall rows in the required pattern."""
-        return Wall(rows=_build_default_wall_rows())
+        return Wall(lines=_build_default_wall_rows())
 
     @staticmethod
-    def new(rows: _WallRowsType) -> Wall:
+    def new(rows: _WallLinesType) -> Wall:
         """Returns a wall with the provided rows."""
-        return Wall(rows=rows)
+        return Wall(lines=rows)
+
+    @staticmethod
+    def line_count() -> PositiveInt:
+        return 5
 
     @field_validator("rows")
     @classmethod
-    def _validate_rows(cls, rows: _WallRowsType) -> _WallRowsType:
+    def _validate_rows(cls, rows: _WallLinesType) -> _WallLinesType:
         row_start_colors = [row.tiles[0].color for row in rows]
         valid_colors = _wall_tile_sequence(row_start_colors[0])
         for color, valid_color in zip(row_start_colors, valid_colors):

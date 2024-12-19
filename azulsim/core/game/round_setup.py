@@ -13,7 +13,7 @@ def round_setup(
     boards: Sequence[Board],
     bag: TileBag,
     discard: TileDiscard,
-    random_strategy: Callable[[Sequence[ColoredTile]], ColoredTile],
+    selection_strategy: Callable[[Sequence[ColoredTile]], ColoredTile],
 ) -> GameState:
     """Initializes necessary components to start a round of the game.
 
@@ -21,6 +21,7 @@ def round_setup(
         boards: Sequence of all boards in the game.
         bag: The tile bag to pull from.
         discard: The discard pile to reset the bag.
+        selection_strategy: Invocable function for selecting a tile.
 
     Returns:
         The modified tile bag and tile discard with the initialized set of factory displays.
@@ -31,7 +32,7 @@ def round_setup(
     for _ in range(player_count + 1):
         pulled_tiles: list[ColoredTile] = []
         while len(pulled_tiles) < 4:
-            new_tile, bag = bag.pull(random_strategy)
+            new_tile, bag = bag.pull(selection_strategy)
             if new_tile is not None:
                 pulled_tiles.append(new_tile)
             else:

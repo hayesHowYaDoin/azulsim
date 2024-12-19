@@ -1,22 +1,19 @@
 """Defines the round setup phase."""
 
 from collections import deque
-from typing import Sequence
+from typing import Callable, Sequence
 
-from ..board import Board
 from .state import GameState
+from ..board import Board
 from ..factory import FactoryDisplay, UnpickedTableCenter
 from ..tiles import ColoredTile, TileBag, TileDiscard, reset_tile_bag
-
-
-
 
 
 def round_setup(
     boards: Sequence[Board],
     bag: TileBag,
     discard: TileDiscard,
-    seed: int,
+    random_strategy: Callable[[Sequence[ColoredTile]], ColoredTile],
 ) -> GameState:
     """Initializes necessary components to start a round of the game.
 
@@ -24,18 +21,17 @@ def round_setup(
         boards: Sequence of all boards in the game.
         bag: The tile bag to pull from.
         discard: The discard pile to reset the bag.
-        seed: Seed for generating random numbers.
 
     Returns:
         The modified tile bag and tile discard with the initialized set of factory displays.
     """
     player_count = len(boards)
 
-    factory_displays: set[FactoryDisplay] = set()
+    factory_displays: list[FactoryDisplay] = list()
     for _ in range(player_count + 1):
         pulled_tiles: list[ColoredTile] = []
         while len(pulled_tiles) < 4:
-            new_tile, bag = bag.pull_random(seed)
+            new_tile, bag = bag.pull(random_strategy)
             if new_tile is not None:
                 pulled_tiles.append(new_tile)
             else:
@@ -45,7 +41,8 @@ def round_setup(
         assert (
             len(tiles) == 4
         ), "Number of tiles in a factory display must be 4."
-        factory_displays.add(FactoryDisplay(tiles=tiles))
+
+        factory_displays.append(FactoryDisplay(tiles=tiles))
 
     return GameState(
         boards=deque(boards),

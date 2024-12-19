@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 from enum import auto, Enum
-import random
-from typing import Iterable, Optional, TypeAlias
+from typing import Callable, Iterable, Optional, Sequence, TypeAlias
 
 from pydantic.dataclasses import dataclass
 
@@ -57,26 +56,37 @@ class TileBag:
         """Returns a discarded tile collection with the argument tiles appended."""
         return TileBag(tiles=self.tiles + tiles)
 
-    def pull_random(self, seed: int) -> tuple[Optional[ColoredTile], TileBag]:
-        """Returns a randomly selected tile from the tile bag with the modified tile bag.
+    def pull(
+        self, random_strategy: Callable[[Sequence[ColoredTile]], ColoredTile]
+    ) -> tuple[Optional[ColoredTile], TileBag]:
+        """Returns a tile from the tile bag selected with the provided strategy and the modified tile bag.
 
         Args:
-            seed: A seed for the random number generator.
+            random_strategy: Invocable function for selecting a tile.
 
         Returns:
-            A randomly selected tile (if one exists) and the tile bag with the selected tile removed.
+            The selected tile (if one exists) and the tile bag with the selected tile removed.
         """
-
         if len(self.tiles) == 0:
             return None, self
 
-        random.seed(seed)
-
-        selected_tile = random.sample(self.tiles, 1)[0]
+        selected_tile = random_strategy(self.tiles)
         remaining_tiles = list(self.tiles)
         remaining_tiles.remove(selected_tile)
 
-        return selected_tile, TileBag(tiles=tuple(remaining_tiles))
+        return (
+            selected_tile,
+            TileBag(tiles=tuple(remaining_tiles)),
+        )
+
+    def __str__(self) -> str:
+        return (
+            f"({ColoredTile.BLACK}: {self.tiles.count(ColoredTile.BLACK)}, "
+            f"({ColoredTile.WHITE}: {self.tiles.count(ColoredTile.WHITE)}, "
+            f"({ColoredTile.BLUE}: {self.tiles.count(ColoredTile.BLUE)}, "
+            f"({ColoredTile.YELLOW}: {self.tiles.count(ColoredTile.YELLOW)}, "
+            f"({ColoredTile.RED}: {self.tiles.count(ColoredTile.RED)})"
+        )
 
 
 @dataclass(frozen=True, kw_only=True)

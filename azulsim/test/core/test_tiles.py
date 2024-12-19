@@ -1,5 +1,8 @@
 """Contains unit tests for the azulsim.core.tiles module."""
 
+import random
+
+from azulsim.core.random import RandomState
 from azulsim.core.tiles import (
     ColoredTile,
     TileBag,
@@ -36,14 +39,14 @@ def test_tile_bag_add() -> None:
 
 def test_tile_bag_pull_random() -> None:
     bag = TileBag.default()
-    tile, new_bag = bag.pull_random(seed=42)
+    tile, new_bag = bag.pull_random(random_state=_set_random_seed(42))
     assert tile in ColoredTile
     assert len(new_bag.tiles) == 99
 
 
 def test_tile_bag_pull_random_empty() -> None:
     bag = TileBag.new([])
-    tile, new_bag = bag.pull_random(seed=42)
+    tile, new_bag = bag.pull_random(random_state=_set_random_seed(42))
     assert tile is None
     assert len(new_bag.tiles) == 0
 
@@ -74,3 +77,8 @@ def test_reset_tile_bag() -> None:
     assert new_bag.tiles.count(ColoredTile.WHITE) == 1
     assert new_bag.tiles.count(ColoredTile.BLUE) == 1
     assert len(new_discard.tiles) == 0
+
+
+def _set_random_seed(seed: int) -> RandomState:
+    random.seed(seed)
+    return random.getstate()

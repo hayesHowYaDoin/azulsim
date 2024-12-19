@@ -1,7 +1,7 @@
 """Defines the factory offer phase."""
 
 from collections import deque
-from typing import Callable
+from typing import Callable, Sequence
 
 from pydantic.dataclasses import dataclass
 from pydantic.types import PositiveInt
@@ -46,6 +46,6 @@ def factory_offer(
 
 
 def factory_offer_end(
-    factory_displays: set[FactoryDisplay], table_center: TableCenter
+    factory_displays: Sequence[FactoryDisplay], table_center: TableCenter
 ) -> bool:
     return False

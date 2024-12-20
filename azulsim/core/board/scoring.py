@@ -24,7 +24,7 @@ class GameScore:
 
     def __add__(self, other: int) -> GameScore:
         """Adds an integer to a game score objects."""
-        return GameScore.new(score=self.score + other)
+        return GameScore.new(score=max(self.score + other, 0))
 
     def __sub__(self, other: int) -> GameScore:
         """Subtracts an integer from a game score object."""

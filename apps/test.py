@@ -89,6 +89,12 @@ def main() -> None:
             discard=state.discard,
         )
 
+    boards = game.wall_tiling.wall_tiling(state.boards)
+    print("Tiled wall:")
+    for wall_line in boards[0].wall:
+        print(wall_line)
+    print(boards[0].score_track)
+
 
 if __name__ == "__main__":
     main()

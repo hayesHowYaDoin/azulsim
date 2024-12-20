@@ -1,7 +1,6 @@
 """Defines the factory offer phase."""
 
 from annotated_types import Ge, Le
-from collections import deque
 from typing import Annotated, Iterable, Optional
 
 from pydantic.dataclasses import dataclass
@@ -90,16 +89,3 @@ def phase_end(
     table_center: TableCenter,
 ) -> bool:
     return factory_displays.empty() and table_center.empty()
-
-
-# TODO: To be used in factory offer phase when implemented
-def _rotate_turn_order(players: deque[Board], first: Board) -> deque[Board]:  # type: ignore
-    if len(players) == 0:
-        raise ValueError("Players object contains no players.")
-    if first not in players:
-        raise ValueError("Player does not exist.")
-
-    while players[0] != first:
-        players.rotate()
-
-    return players

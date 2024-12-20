@@ -1,18 +1,21 @@
 """Defines the wall tiling (scoring) phase."""
 
 from __future__ import annotations
+from collections import deque
+from typing import Optional, Sequence
 
 from pydantic import NonNegativeInt
 
-from ..board import EmptyWallSpace, PopulatedWallSpace
-
 from ..board import (
     Board,
+    EmptyWallSpace,
+    PopulatedWallSpace,
     PopulatedPatternLine,
     Wall,
     WallLine,
     calculate_floor_penalty,
 )
+from ..tiles import StartingPlayerMarker
 
 
 def _tile_wall(board: Board) -> Board:
@@ -49,7 +52,7 @@ def _score_board(previous: Board, current: Board) -> Board:
 
     deduction = calculate_floor_penalty(current.floor_line)
 
-    total_score = current.score_track + earned_score - deduction
+    total_score = current.score_track + earned_score + deduction
 
     return Board.new(
         total_score,
@@ -57,6 +60,18 @@ def _score_board(previous: Board, current: Board) -> Board:
         current.floor_line,
         current.wall,
     )
+
+
+def _rotate_turn_order(players: deque[Board], first: Board) -> deque[Board]:  # type: ignore
+    if len(players) == 0:
+        raise ValueError("Players object contains no players.")
+    if first not in players:
+        raise ValueError("Player does not exist.")
+
+    while players[0] != first:
+        players.rotate()
+
+    return players
 
 
 def _discard_tiles(board: Board) -> Board:
@@ -68,14 +83,24 @@ def _discard_tiles(board: Board) -> Board:
     )
 
 
-def wall_tiling(boards: list[Board]) -> list[Board]:
+def wall_tiling(boards: Sequence[Board]) -> deque[Board]:
     """Returns the boards tiled and scored."""
-    updated_boards: list[Board] = []
+    updated_boards: deque[Board] = deque([])
+    starting_player: Optional[Board] = None
     for board in boards:
         updated_board = _tile_wall(board)
         updated_board = _score_board(board, updated_board)
+
+        floor_line = updated_board.floor_line
+        if any(isinstance(t, StartingPlayerMarker) for t in floor_line.tiles):
+            starting_player = updated_board
         updated_board = _discard_tiles(updated_board)
 
         updated_boards.append(updated_board)
 
-    return boards
+    assert (
+        starting_player is not None
+    ), "No board contains starting player token, gameplay loop likely incomplete."
+    updated_boards = _rotate_turn_order(updated_boards, starting_player)
+
+    return updated_boards

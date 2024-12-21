@@ -1,5 +1,8 @@
 """Module containing functions for representing core types in the terminal."""
 
+from annotated_types import Ge, Le
+from typing import Annotated, Optional
+
 from pydantic.types import PositiveInt
 from termcolor import colored
 
@@ -17,6 +20,11 @@ from azulsim.core.board import (
     PopulatedWallSpace,
 )
 from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, Tile
+from azulsim.core.factory import (
+    FactoryDisplay,
+    TableCenter,
+    UnpickedTableCenter,
+)
 
 
 _TILE_COLORS = {
@@ -136,3 +144,35 @@ def format_board(board: Board) -> str:
         + floor_line_str
         + "└───────────────────────┘"
     )
+
+
+def format_factory_display(
+    factory: FactoryDisplay,
+    number: Optional[Annotated[int, Ge(0), Le(9)]] = None,
+) -> str:
+    center_symbol = number if number else "x"
+    return (
+        "      ─┬─     \n"
+        + "   ────·────  \n"
+        + f"  ───{format_tile(factory.tiles[0])}─┼─{format_tile(factory.tiles[1])}───\n"
+        + f"├──·───{center_symbol}───·──┤\n"
+        + f"  ───{format_tile(factory.tiles[2])}─┼─{format_tile(factory.tiles[3])}───\n"
+        + "   ────·────  \n"
+        + "      ─┴─    "
+    )
+
+
+def format_table_center(center: TableCenter) -> str:
+    lines: list[str] = []
+
+    starting_player_marker_count = 0
+    if isinstance(center, UnpickedTableCenter):
+        starting_player_marker_count = 1
+    lines.append(
+        f"{format_tile(StartingPlayerMarker())} x {starting_player_marker_count}"
+    )
+
+    for color in ColoredTile:
+        lines.append(f"{format_tile(color)} x {center.tiles.count(color)}")
+
+    return "\n".join(lines)

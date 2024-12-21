@@ -1,6 +1,7 @@
 from collections import deque
 
 from azulsim.core import game
+from azulsim.shell import terminal
 
 
 def main() -> None:
@@ -40,6 +41,7 @@ def main() -> None:
             print(f"You selected: {unique_colors[selected_number]}")
         else:
             print("Invalid display number.")
+            continue
         selected_color = unique_colors[selected_number]
 
         result = game.factory_offer.select_tiles(
@@ -76,10 +78,7 @@ def main() -> None:
             print("Weird error encountered...")
             continue
 
-        print("Board state:")
-        for line in board.pattern_lines:
-            print(line)
-        print(board.floor_line)
+        print(terminal.format_board(board))
 
         state = game.GameState(
             boards=deque([board]),

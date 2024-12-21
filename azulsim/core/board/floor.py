@@ -8,7 +8,7 @@ from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
 from pydantic.types import NegativeInt, PositiveInt
 
-from ..tiles import ColoredTile, StartingPlayerMarker, Tile
+from ..tiles import Tile
 
 
 @dataclass(

@@ -1,8 +1,5 @@
 """Module containing functions for representing core types in the terminal."""
 
-from annotated_types import Ge, Le
-from typing import Annotated, Optional
-
 from pydantic.types import PositiveInt
 from termcolor import colored
 
@@ -146,16 +143,12 @@ def format_board(board: Board) -> str:
     )
 
 
-def format_factory_display(
-    factory: FactoryDisplay,
-    number: Optional[Annotated[int, Ge(0), Le(9)]] = None,
-) -> str:
-    center_symbol = number if number else "x"
+def format_factory_display(factory: FactoryDisplay) -> str:
     return (
         "      ─┬─     \n"
         + "   ────·────  \n"
         + f"  ───{format_tile(factory.tiles[0])}─┼─{format_tile(factory.tiles[1])}───\n"
-        + f"├──·───{center_symbol}───·──┤\n"
+        + "├──·───x───·──┤\n"
         + f"  ───{format_tile(factory.tiles[2])}─┼─{format_tile(factory.tiles[3])}───\n"
         + "   ────·────  \n"
         + "      ─┴─    "

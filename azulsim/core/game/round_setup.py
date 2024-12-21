@@ -1,34 +1,103 @@
 """Defines the round setup phase."""
 
 from collections import deque
-from typing import Callable, Sequence
+from typing import Callable, Optional, Sequence
 
-from ..board import Board
+from pydantic.types import PositiveInt
+from pydantic.dataclasses import dataclass
+
+from ..board import (
+    Board,
+    FloorLine,
+    PatternLine,
+    PatternLines,
+    EmptyPatternLine,
+    PopulatedPatternLine,
+)
 from ..factory import FactoryDisplay, FactoryDisplays, UnpickedTableCenter
-from ..tiles import ColoredTile, TileBag, TileDiscard, reset_tile_bag
+from ..tiles import (
+    ColoredTile,
+    StartingPlayerMarker,
+    TileBag,
+    TileDiscard,
+    reset_tile_bag,
+)
 
 
-def round_setup(
-    boards: Sequence[Board],
+def _rotate_turn_order(boards: deque[Board], first: Board) -> deque[Board]:  # type: ignore
+    if len(boards) == 0:
+        raise ValueError("Players object contains no players.")
+    if first not in boards:
+        raise ValueError("Player does not exist.")
+
+    while boards[0] != first:
+        boards.rotate()
+
+    return boards
+
+
+def _clear_full_pattern_lines(board: Board) -> PatternLines:
+    lines: list[PatternLine] = []
+    for index, line in enumerate(board.pattern_lines):
+        if (
+            isinstance(line, PopulatedPatternLine)
+            and line.tile_count == index + 1
+        ):
+            lines.append(EmptyPatternLine())
+        else:
+            lines.append(line)
+
+    pattern_lines = tuple(lines)
+    assert len(pattern_lines) == PatternLines.line_count()
+    return PatternLines.new(pattern_lines)
+
+
+def reset_boards(boards: Sequence[Board]) -> deque[Board]:
+    if len(boards) == 0:
+        raise ValueError("No boards in argument sequence.")
+
+    first_player: Optional[Board] = None
+    updated_boards: deque[Board] = deque([])
+    for board in boards:
+        pattern_lines = _clear_full_pattern_lines(board)
+        floor_line = FloorLine.default()
+
+        updated_board = Board.new(
+            board.score_track,
+            pattern_lines,
+            floor_line,
+            board.wall,
+        )
+
+        floor_tiles = board.floor_line.tiles
+        if any(isinstance(tile, StartingPlayerMarker) for tile in floor_tiles):
+            first_player = updated_board
+
+        updated_boards.append(updated_board)
+
+    if first_player is None:
+        raise ValueError(
+            "No board in the provided list has the starting player marker."
+        )
+
+    updated_boards = _rotate_turn_order(updated_boards, first_player)
+    return updated_boards
+
+
+@dataclass(frozen=True, kw_only=True)
+class ResetTilePoolsResult:
+    factory_displays: FactoryDisplays
+    table_center: UnpickedTableCenter
+    bag: TileBag
+    discard: TileDiscard
+
+
+def reset_tile_pools(
+    player_count: PositiveInt,
     bag: TileBag,
     discard: TileDiscard,
     selection_strategy: Callable[[Sequence[ColoredTile]], ColoredTile],
-) -> tuple[
-    deque[Board], FactoryDisplays, UnpickedTableCenter, TileBag, TileDiscard
-]:
-    """Initializes necessary components to start a round of the game.
-
-    Args:
-        boards: Sequence of all boards in the game.
-        bag: The tile bag to pull from.
-        discard: The discard pile to reset the bag.
-        selection_strategy: Invocable function for selecting a tile.
-
-    Returns:
-        The modified tile bag and tile discard with the initialized set of factory displays.
-    """
-    player_count = len(boards)
-
+) -> ResetTilePoolsResult:
     factory_displays: list[FactoryDisplay] = list()
     for _ in range(player_count + 1):
         pulled_tiles: list[ColoredTile] = []
@@ -46,10 +115,12 @@ def round_setup(
 
         factory_displays.append(FactoryDisplay(tiles=tiles))
 
-    return (
-        deque(boards),
-        FactoryDisplays.new(factory_displays),
-        UnpickedTableCenter.default(),
-        bag,
-        discard,
+    updated_factory_displays = FactoryDisplays.new(factory_displays)
+    updated_table_center = UnpickedTableCenter.default()
+
+    return ResetTilePoolsResult(
+        factory_displays=updated_factory_displays,
+        table_center=updated_table_center,
+        bag=bag,
+        discard=discard,
     )

@@ -1,7 +1,7 @@
 """Defines representations of tile pools from which a player can pick from."""
 
 from __future__ import annotations
-from typing import Iterable, Sequence, TypeAlias
+from typing import Generator, Iterable, Sequence, TypeAlias
 
 from pydantic import NonNegativeInt
 from pydantic.dataclasses import dataclass
@@ -64,6 +64,10 @@ class FactoryDisplays:
     def __len__(self) -> NonNegativeInt:
         """Returns the number of factory displays in the collection."""
         return len(self.factories)
+
+    def __iter__(self) -> Generator[FactoryDisplay, None, None]:
+        """Returns a generator for iterating through the factory displays."""
+        return (factory for factory in self.factories)
 
 
 @dataclass(frozen=True, kw_only=True)

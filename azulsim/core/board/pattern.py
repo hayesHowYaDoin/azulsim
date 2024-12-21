@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from annotated_types import Ge, Le
-from typing import Annotated, Generator, Optional, TypeAlias
+from typing import Annotated, Generator, Optional, Sequence, TypeAlias
 
 from pydantic import ConfigDict, field_validator
 from pydantic.types import NonNegativeInt, PositiveInt
@@ -72,9 +72,11 @@ class PatternLines:
         return PatternLines(lines=_build_default_pattern_lines())
 
     @staticmethod
-    def new(lines: _PatternLinesType) -> PatternLines:
+    def new(lines: Sequence[PatternLine]) -> PatternLines:
         """Returns a pattern lines object with the provided pattern lines."""
-        return PatternLines(lines=lines)
+        lines_tuple = tuple(lines)
+        assert len(lines_tuple) == 5
+        return PatternLines(lines=lines_tuple)
 
     @staticmethod
     def line_count() -> PositiveInt:

@@ -1,10 +1,38 @@
 from collections import deque
+import random
 
 from azulsim.core import game
 from azulsim.shell import terminal
 
 
-def factory_offer(state: game.GameState) -> game.GameState:
+def _run_round_setup(state: game.GameState) -> game.GameState:
+    print(" ROUND SETUP ".center(40, "═"))
+    boards = game.round_setup.reset_boards(state.boards)
+    result = game.round_setup.reset_tile_pools(
+        len(state.boards),
+        state.bag,
+        state.discard,
+        lambda x: random.sample(x, 1)[0],
+    )
+
+    for board in boards:
+        print(terminal.format_board(board))
+
+    for factory in result.factory_displays:
+        print(terminal.format_factory_display(factory))
+
+    return game.GameState(
+        boards=boards,
+        factory_displays=result.factory_displays,
+        table_center=result.table_center,
+        bag=result.bag,
+        discard=result.discard,
+    )
+
+
+def _run_factory_offer(state: game.GameState) -> game.GameState:
+    print(" FACTORY OFFER ".center(40, "═"))
+
     while not game.factory_offer.phase_end(
         state.factory_displays, state.table_center
     ):
@@ -96,18 +124,34 @@ def factory_offer(state: game.GameState) -> game.GameState:
     return state
 
 
-def main() -> None:
-    state = game.GameState.new(player_count=1, seed=42)
-
-    print(" ROUND SETUP ".center(40, "═"))
-    print(terminal.format_board(state.boards[0]))
-
-    print(" FACTORY OFFER ".center(40, "═"))
-    state = factory_offer(state)
-
+def _run_wall_tiling(state: game.GameState) -> game.GameState:
     print(" WALL TILING ".center(40, "═"))
     boards = game.wall_tiling.wall_tiling(state.boards)
-    print(terminal.format_board(boards[0]))
+
+    for board in boards:
+        print(terminal.format_board(board))
+
+    return game.GameState(
+        boards=boards,
+        factory_displays=state.factory_displays,
+        table_center=state.table_center,
+        bag=state.bag,
+        discard=state.discard,
+    )
+
+
+def main() -> None:
+    random.seed(42)
+    state = game.GameState.new(
+        player_count=1,
+        selection_strategy=lambda x: random.sample(x, 1)[0],
+    )
+
+    # TODO: Include end condition for game loop
+    while True:
+        state = _run_factory_offer(state)
+        state = _run_wall_tiling(state)
+        state = _run_round_setup(state)
 
 
 if __name__ == "__main__":

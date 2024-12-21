@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 from collections import deque
-import random
+from typing import Callable, Sequence
 
 from pydantic import PositiveInt
 from pydantic.dataclasses import dataclass
 
-from .round_setup import round_setup
+from .round_setup import reset_tile_pools
 from ..board import Board
 from ..factory import FactoryDisplays, TableCenter
-from ..tiles import TileBag, TileDiscard
+from ..tiles import ColoredTile, TileBag, TileDiscard
 
 
 @dataclass(kw_only=True)
@@ -24,7 +24,10 @@ class GameState:
     discard: TileDiscard
 
     @staticmethod
-    def new(player_count: PositiveInt, seed: int) -> GameState:
+    def new(
+        player_count: PositiveInt,
+        selection_strategy: Callable[[Sequence[ColoredTile]], ColoredTile],
+    ) -> GameState:
         """Returns a state object for a new game.
 
         Args:
@@ -34,20 +37,18 @@ class GameState:
         Returns:
             A constructed game state object.
         """
-        random.seed(seed)
-
         boards = deque([Board.default()] * player_count)
-        boards, factory_displays, table_center, bag, discard = round_setup(
-            boards,
+        result = reset_tile_pools(
+            len(boards),
             TileBag.default(),
             TileDiscard.default(),
-            selection_strategy=lambda x: random.sample(x, 1)[0],
+            selection_strategy=selection_strategy,
         )
 
         return GameState(
             boards=boards,
-            factory_displays=factory_displays,
-            table_center=table_center,
-            bag=bag,
-            discard=discard,
+            factory_displays=result.factory_displays,
+            table_center=result.table_center,
+            bag=result.bag,
+            discard=result.discard,
         )

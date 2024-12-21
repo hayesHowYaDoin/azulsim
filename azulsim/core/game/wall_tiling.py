@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from collections import deque
-from typing import Optional, Sequence
+from typing import Sequence
 
 from pydantic import NonNegativeInt
 
@@ -15,7 +15,6 @@ from ..board import (
     WallLine,
     calculate_floor_penalty,
 )
-from ..tiles import StartingPlayerMarker
 
 
 def _tile_wall(board: Board) -> Board:
@@ -62,45 +61,13 @@ def _score_board(previous: Board, current: Board) -> Board:
     )
 
 
-def _rotate_turn_order(players: deque[Board], first: Board) -> deque[Board]:  # type: ignore
-    if len(players) == 0:
-        raise ValueError("Players object contains no players.")
-    if first not in players:
-        raise ValueError("Player does not exist.")
-
-    while players[0] != first:
-        players.rotate()
-
-    return players
-
-
-def _discard_tiles(board: Board) -> Board:
-    return Board.new(
-        board.score_track,
-        board.pattern_lines,
-        board.floor_line,
-        board.wall,
-    )
-
-
 def wall_tiling(boards: Sequence[Board]) -> deque[Board]:
     """Returns the boards tiled and scored."""
     updated_boards: deque[Board] = deque([])
-    starting_player: Optional[Board] = None
     for board in boards:
         updated_board = _tile_wall(board)
         updated_board = _score_board(board, updated_board)
 
-        floor_line = updated_board.floor_line
-        if any(isinstance(t, StartingPlayerMarker) for t in floor_line.tiles):
-            starting_player = updated_board
-        updated_board = _discard_tiles(updated_board)
-
         updated_boards.append(updated_board)
-
-    assert (
-        starting_player is not None
-    ), "No board contains starting player token, gameplay loop likely incomplete."
-    updated_boards = _rotate_turn_order(updated_boards, starting_player)
 
     return updated_boards

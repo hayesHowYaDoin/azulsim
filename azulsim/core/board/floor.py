@@ -26,18 +26,17 @@ class FloorLine:
 
     @staticmethod
     def new(tiles: Sequence[Tile]) -> FloorLine:
+        """Returns a floor line object with the provided tiles."""
         return FloorLine(tiles=tuple(tiles))
 
     @staticmethod
     def spaces_count() -> PositiveInt:
+        """Returns the number of spaces in a floor line."""
         return 7
 
     def add(self, tiles: Sequence[Tile]) -> FloorLine:
-        remaining_spaces = FloorLine.spaces_count() - len(self.tiles)
-        if remaining_spaces <= 0:
-            return self
-
-        tiles = self.tiles + tuple(tiles[:remaining_spaces])
+        """Resurns the floor line with the provided tiles added."""
+        tiles = self.tiles + tuple(tiles)
         return FloorLine(tiles=tiles)
 
 

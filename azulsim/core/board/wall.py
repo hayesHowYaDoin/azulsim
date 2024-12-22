@@ -109,18 +109,18 @@ class WallLine:
         """Returns a generator for iterating through the spaces in the wall line."""
         return (space for space in self.spaces)
 
-    @field_validator("tiles")
+    @field_validator("spaces")
     @classmethod
     def _validate_tiles(
-        cls, tiles: _WallSpacesTilesType
+        cls, spaces: _WallSpacesTilesType
     ) -> _WallSpacesTilesType:
-        row_colors = [tile.color for tile in tiles]
-        valid_colors = _wall_tile_sequence(row_colors[0])
-        for color, valid_color in zip(row_colors, valid_colors):
+        space_colors = [space.color for space in spaces]
+        valid_colors = _wall_tile_sequence(space_colors[0])
+        for color, valid_color in zip(space_colors, valid_colors):
             if color != valid_color:
                 raise ValueError("Colors must follow wall sequence.")
 
-        return tiles
+        return spaces
 
 
 def _build_default_wall_rows() -> (

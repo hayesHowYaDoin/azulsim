@@ -37,7 +37,10 @@ def reset_tile_pools(
     discard: TileDiscard,
     selection_strategy: Callable[[Sequence[ColoredTile]], ColoredTile],
 ) -> ResetTilePoolsResult:
-    """Returns updated game components from refilling the factory displays and clearing the table center.
+    """Creates a collection of factory displays and clearing the table center.
+    Factory displays are populated with tiles selected from the tile bag using
+    the provided selection strategy. If the tile bag runs out of tiles, the
+    tile discard is emptied into the tile bag and selection continues.
 
     Args:
         player_count: Number of players in the current game.

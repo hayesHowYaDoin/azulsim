@@ -134,4 +134,8 @@ def phase_end(
     table_center: TableCenter,
 ) -> bool:
     """Returns boolean indicating if factory offer phase has ended."""
-    return factory_displays.empty() and table_center.empty()
+    return (
+        factory_displays.empty()
+        and isinstance(table_center, PickedTableCenter)
+        and table_center.empty()
+    )

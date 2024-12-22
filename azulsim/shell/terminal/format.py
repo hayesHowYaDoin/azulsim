@@ -83,7 +83,7 @@ def _format_wall_space(space: WallSpace) -> str:
 
 def _format_wall_line(line: WallLine) -> str:
     line_str = ""
-    for tile in line.tiles:
+    for tile in line.spaces:
         line_str = line_str + f"{_format_wall_space(tile)} "
 
     return line_str

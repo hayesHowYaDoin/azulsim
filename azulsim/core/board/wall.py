@@ -59,7 +59,7 @@ def _wall_tile_sequence(
         yield color
 
 
-_WallLineTilesType: TypeAlias = tuple[
+_WallSpacesTilesType: TypeAlias = tuple[
     WallSpace, WallSpace, WallSpace, WallSpace, WallSpace
 ]
 
@@ -68,7 +68,7 @@ _WallLineTilesType: TypeAlias = tuple[
 class WallLine:
     """A line in the wall section of a board."""
 
-    tiles: _WallLineTilesType
+    spaces: _WallSpacesTilesType
 
     @staticmethod
     def from_leftmost(leftmost_color: ColoredTile) -> WallLine:
@@ -80,11 +80,11 @@ class WallLine:
 
         tiles = tuple(islice(row_sequence, WallLine.tile_count()))
         assert len(tiles) == 5, "Number of tiles in a wall row must be 5."
-        return WallLine(tiles=tiles)
+        return WallLine(spaces=tiles)
 
     @staticmethod
     def new(tiles: Iterable[WallSpace]) -> WallLine:
-        return WallLine(tiles=_WallLineTilesType(tiles))
+        return WallLine(spaces=_WallSpacesTilesType(tiles))
 
     @staticmethod
     def tile_count() -> PositiveInt:
@@ -93,7 +93,7 @@ class WallLine:
     def populate_tile(self, color: ColoredTile) -> WallLine:
         """Returns a wall line with the space of the argument color added."""
         tiles: list[WallSpace] = []
-        for tile in self.tiles:
+        for tile in self.spaces:
             if tile.color != color:
                 tiles.append(tile)
             else:
@@ -103,11 +103,17 @@ class WallLine:
 
     def __getitem__(self, key: NonNegativeInt) -> WallSpace:
         """Returns the wall space at the provided index key."""
-        return self.tiles[key]
+        return self.spaces[key]
+
+    def __iter__(self) -> Generator[WallSpace, None, None]:
+        """Returns a generator for iterating through the spaces in the wall line."""
+        return (space for space in self.spaces)
 
     @field_validator("tiles")
     @classmethod
-    def _validate_tiles(cls, tiles: _WallLineTilesType) -> _WallLineTilesType:
+    def _validate_tiles(
+        cls, tiles: _WallSpacesTilesType
+    ) -> _WallSpacesTilesType:
         row_colors = [tile.color for tile in tiles]
         valid_colors = _wall_tile_sequence(row_colors[0])
         for color, valid_color in zip(row_colors, valid_colors):
@@ -167,7 +173,7 @@ class Wall:
     @field_validator("lines")
     @classmethod
     def _validate_lines(cls, lines: _WallLinesType) -> _WallLinesType:
-        line_start_colors = [line.tiles[0].color for line in lines]
+        line_start_colors = [line.spaces[0].color for line in lines]
         valid_colors = _wall_tile_sequence(line_start_colors[0])
         for color, valid_color in zip(line_start_colors, valid_colors):
             if color != valid_color:

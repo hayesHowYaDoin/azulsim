@@ -16,6 +16,15 @@ from ..tiles import (
 
 @dataclass(frozen=True, kw_only=True)
 class ResetTilePoolsResult:
+    """Updated state from resetting the tile pools.
+
+    Attributes:
+        factory_displays: Updated factory displays.
+        table_center: Table center reset to unpicked state.
+        bag: Updated bag of game tiles.
+        discard: Updated collection of discarded game tiles.
+    """
+
     factory_displays: FactoryDisplays
     table_center: UnpickedTableCenter
     bag: TileBag
@@ -28,6 +37,17 @@ def reset_tile_pools(
     discard: TileDiscard,
     selection_strategy: Callable[[Sequence[ColoredTile]], ColoredTile],
 ) -> ResetTilePoolsResult:
+    """Returns updated game components from refilling the factory displays and clearing the table center.
+
+    Args:
+        player_count: Number of players in the current game.
+        bag: Tile bag state for the current game.
+        discard: Tile discard state for the current game.
+        selection_strategy: Invocable strategy for selecting a tile from the tile bag.
+
+    Returns:
+        Aggregation of updated state objects.
+    """
     factory_displays: list[FactoryDisplay] = list()
     for _ in range(player_count + 1):
         pulled_tiles: list[ColoredTile] = []

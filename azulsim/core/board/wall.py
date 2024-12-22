@@ -3,7 +3,7 @@
 from __future__ import annotations
 from collections import deque
 from itertools import cycle, islice
-from typing import Generator, Iterable, TypeAlias
+from typing import Generator, Iterable, Sequence, TypeAlias
 
 from pydantic import field_validator, PositiveInt, NonNegativeInt
 from pydantic.dataclasses import dataclass
@@ -101,6 +101,10 @@ class WallLine:
 
         return WallLine.new(tiles)
 
+    def __getitem__(self, key: NonNegativeInt) -> WallSpace:
+        """Returns the wall space at the provided index key."""
+        return self.tiles[key]
+
     @field_validator("tiles")
     @classmethod
     def _validate_tiles(cls, tiles: _WallLineTilesType) -> _WallLineTilesType:
@@ -142,9 +146,11 @@ class Wall:
         return Wall(lines=_build_default_wall_rows())
 
     @staticmethod
-    def new(rows: _WallLinesType) -> Wall:
+    def new(lines: Sequence[WallLine]) -> Wall:
         """Returns a wall with the provided rows."""
-        return Wall(lines=rows)
+        wall_lines = tuple(lines)
+        assert len(wall_lines) == 5
+        return Wall(lines=wall_lines)
 
     @staticmethod
     def line_count() -> PositiveInt:

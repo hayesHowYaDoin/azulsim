@@ -13,10 +13,6 @@ def _run_round_setup(state: game.GameState) -> game.GameState:
     bag = state.bag
     discard = state.discard
 
-    boards_result = game.round_setup.reset_boards(state.boards, state.discard)
-    boards = boards_result.boards
-    discard = boards_result.discard
-
     tile_pools_result = game.round_setup.reset_tile_pools(
         len(boards),
         bag,
@@ -28,9 +24,7 @@ def _run_round_setup(state: game.GameState) -> game.GameState:
     bag = tile_pools_result.bag
     discard = tile_pools_result.discard
 
-    for board in boards:
-        print(terminal.format_board(board))
-
+    print(terminal.format_table_center(table_center))
     for factory in factory_displays:
         print(terminal.format_factory_display(factory))
 
@@ -139,7 +133,7 @@ def _run_factory_offer(state: game.GameState) -> game.GameState:
 
 def _run_wall_tiling(state: game.GameState) -> game.GameState:
     print(" WALL TILING ".center(40, "═"))
-    boards = game.wall_tiling.wall_tiling(state.boards)
+    boards, discard = game.wall_tiling.wall_tiling(state.boards, state.discard)
 
     for board in boards:
         print(terminal.format_board(board))
@@ -149,7 +143,7 @@ def _run_wall_tiling(state: game.GameState) -> game.GameState:
         factory_displays=state.factory_displays,
         table_center=state.table_center,
         bag=state.bag,
-        discard=state.discard,
+        discard=discard,
     )
 
 

@@ -89,7 +89,9 @@ def _run_factory_offer(state: game.GameState) -> game.GameState:
             print("Invalid selection.")
             continue
 
-        tiles, factories, table_center = result
+        tiles = result.tiles
+        factories = result.factory_displays
+        table_center = result.table_center
 
         print(" PATTERN LINE SELECTION ".center(40, "─"))
 
@@ -133,7 +135,7 @@ def _run_factory_offer(state: game.GameState) -> game.GameState:
 
 def _run_wall_tiling(state: game.GameState) -> game.GameState:
     print(" WALL TILING ".center(40, "═"))
-    boards, discard = game.wall_tiling.wall_tiling(state.boards, state.discard)
+    boards, discard = game.wall_tiling.tile_boards(state.boards, state.discard)
 
     for board in boards:
         print(terminal.format_board(board))

@@ -1,6 +1,7 @@
 """Defines a game board."""
 
 from __future__ import annotations
+import uuid
 
 from pydantic.dataclasses import dataclass
 
@@ -14,6 +15,7 @@ from .wall import Wall
 class Board:
     """A player board in a game."""
 
+    uid: uuid.UUID
     score_track: GameScore
     pattern_lines: PatternLines
     floor_line: FloorLine
@@ -23,6 +25,7 @@ class Board:
     def default() -> Board:
         """Returns a board with defaulted sections."""
         return Board(
+            uid=uuid.uuid4(),
             score_track=GameScore.default(),
             pattern_lines=PatternLines.default(),
             floor_line=FloorLine.default(),
@@ -42,4 +45,5 @@ class Board:
             pattern_lines=pattern_lines,
             floor_line=floor_line,
             wall=wall,
+            uid=uuid.uuid4(),
         )

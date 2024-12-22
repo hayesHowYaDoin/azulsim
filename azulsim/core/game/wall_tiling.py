@@ -120,7 +120,7 @@ def tile_board(board: Board, discard: TileDiscard) -> tuple[Board, TileDiscard]:
     return board, discard
 
 
-def wall_tiling(
+def tile_boards(
     boards: Sequence[Board], discard: TileDiscard
 ) -> tuple[deque[Board], TileDiscard]:
     """Returns the boards tiled and scored with the updated discard pile."""

@@ -59,7 +59,9 @@ def _build_default_pattern_lines() -> _PatternLinesType:
 
 
 @dataclass(
-    frozen=True, kw_only=True, config=ConfigDict(arbitrary_types_allowed=True)
+    frozen=True,
+    kw_only=True,
+    config=ConfigDict(arbitrary_types_allowed=True),
 )
 class PatternLines:
     """The pattern lines section of a board."""

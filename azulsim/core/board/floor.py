@@ -12,7 +12,9 @@ from ..tiles import Tile
 
 
 @dataclass(
-    frozen=True, kw_only=True, config=ConfigDict(arbitrary_types_allowed=True)
+    frozen=True,
+    kw_only=True,
+    config=ConfigDict(arbitrary_types_allowed=True),
 )
 class FloorLine:
     """A floor line on a board."""

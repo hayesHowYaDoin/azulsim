@@ -16,7 +16,7 @@ from ..tiles import (
 
 @dataclass(frozen=True, kw_only=True)
 class ResetTilePoolsResult:
-    """Updated state from resetting the tile pools.
+    """Result aggregate from the reset_tile_pools method.
 
     Attributes:
         factory_displays: Updated factory displays.
@@ -66,7 +66,7 @@ def reset_tile_pools(
             len(tiles) == 4
         ), "Number of tiles in a factory display must be 4."
 
-        factory_displays.append(FactoryDisplay(tiles=tiles))
+        factory_displays.append(FactoryDisplay.new(tiles=tiles))
 
     updated_factory_displays = FactoryDisplays.new(factory_displays)
     updated_table_center = UnpickedTableCenter.default()

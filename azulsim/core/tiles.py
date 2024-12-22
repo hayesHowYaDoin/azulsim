@@ -105,9 +105,9 @@ class TileDiscard:
         """Returns a discarded tile collection with the argument tiles."""
         return TileDiscard(tiles=tuple(tiles))
 
-    def add(self, tiles: tuple[ColoredTile, ...]) -> TileDiscard:
+    def add(self, tiles: Sequence[ColoredTile]) -> TileDiscard:
         """Returns a discarded tile collection with the argument tiles appended."""
-        return TileDiscard(tiles=self.tiles + tiles)
+        return TileDiscard(tiles=self.tiles + tuple(tiles))
 
 
 def reset_tile_bag(

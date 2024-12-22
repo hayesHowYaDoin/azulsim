@@ -36,31 +36,56 @@ def _rotate_turn_order(boards: deque[Board], first: Board) -> deque[Board]:  # t
     return boards
 
 
-def _clear_full_pattern_lines(board: Board) -> PatternLines:
-    lines: list[PatternLine] = []
-    for index, line in enumerate(board.pattern_lines):
+def _clear_full_pattern_lines(
+    lines: PatternLines,
+    discard: TileDiscard,
+) -> tuple[PatternLines, TileDiscard]:
+    updated_lines: list[PatternLine] = []
+    for index, line in enumerate(lines):
         if (
             isinstance(line, PopulatedPatternLine)
             and line.tile_count == index + 1
         ):
-            lines.append(EmptyPatternLine())
+            discard = discard.add([line.color] * line.tile_count)
+            updated_lines.append(EmptyPatternLine())
         else:
-            lines.append(line)
+            updated_lines.append(line)
 
-    pattern_lines = tuple(lines)
+    pattern_lines = tuple(updated_lines)
     assert len(pattern_lines) == PatternLines.line_count()
-    return PatternLines.new(pattern_lines)
+    return PatternLines.new(pattern_lines), discard
 
 
-def reset_boards(boards: Sequence[Board]) -> deque[Board]:
+def _clear_floor_line(
+    floor: FloorLine, discard: TileDiscard
+) -> tuple[FloorLine, TileDiscard]:
+    colored_tiles = tuple(
+        tile for tile in floor.tiles if isinstance(tile, ColoredTile)
+    )
+    discard = discard.add(colored_tiles)
+
+    return FloorLine.default(), discard
+
+
+@dataclass(frozen=True, kw_only=True)
+class ResetBoardsResult:
+    boards: deque[Board]
+    discard: TileDiscard
+
+
+def reset_boards(
+    boards: Sequence[Board], discard: TileDiscard
+) -> ResetBoardsResult:
     if len(boards) == 0:
         raise ValueError("No boards in argument sequence.")
 
     first_player: Optional[Board] = None
     updated_boards: deque[Board] = deque([])
     for board in boards:
-        pattern_lines = _clear_full_pattern_lines(board)
-        floor_line = FloorLine.default()
+        pattern_lines, discard = _clear_full_pattern_lines(
+            board.pattern_lines, discard
+        )
+        floor_line, discard = _clear_floor_line(board.floor_line, discard)
 
         updated_board = Board.new(
             board.score_track,
@@ -81,7 +106,7 @@ def reset_boards(boards: Sequence[Board]) -> deque[Board]:
         )
 
     updated_boards = _rotate_turn_order(updated_boards, first_player)
-    return updated_boards
+    return ResetBoardsResult(boards=updated_boards, discard=discard)
 
 
 @dataclass(frozen=True, kw_only=True)

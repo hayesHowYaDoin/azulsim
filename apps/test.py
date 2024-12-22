@@ -7,26 +7,39 @@ from azulsim.shell import terminal
 
 def _run_round_setup(state: game.GameState) -> game.GameState:
     print(" ROUND SETUP ".center(40, "═"))
-    boards = game.round_setup.reset_boards(state.boards)
-    result = game.round_setup.reset_tile_pools(
-        len(state.boards),
-        state.bag,
-        state.discard,
+    boards = state.boards
+    factory_displays = state.factory_displays
+    table_center = state.table_center
+    bag = state.bag
+    discard = state.discard
+
+    boards_result = game.round_setup.reset_boards(state.boards, state.discard)
+    boards = boards_result.boards
+    discard = boards_result.discard
+
+    tile_pools_result = game.round_setup.reset_tile_pools(
+        len(boards),
+        bag,
+        discard,
         lambda x: random.sample(x, 1)[0],
     )
+    factory_displays = tile_pools_result.factory_displays
+    table_center = tile_pools_result.table_center
+    bag = tile_pools_result.bag
+    discard = tile_pools_result.discard
 
     for board in boards:
         print(terminal.format_board(board))
 
-    for factory in result.factory_displays:
+    for factory in factory_displays:
         print(terminal.format_factory_display(factory))
 
     return game.GameState(
         boards=boards,
-        factory_displays=result.factory_displays,
-        table_center=result.table_center,
-        bag=result.bag,
-        discard=result.discard,
+        factory_displays=factory_displays,
+        table_center=table_center,
+        bag=bag,
+        discard=discard,
     )
 
 

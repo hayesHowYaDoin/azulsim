@@ -1,4 +1,4 @@
-"""Contains unit tests for the azulsim.core.game.round_setup module."""
+"""Contains unit tests for the azulsim.core.game.round_setup module's reset_tile_pools function."""
 
 from azulsim.core.game import round_setup
 from azulsim.core.tiles import ColoredTile, TileBag, TileDiscard

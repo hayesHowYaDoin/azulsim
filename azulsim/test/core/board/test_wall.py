@@ -46,7 +46,7 @@ def test_wall_line_invalid_sequence():
         )
 
 
-def test_wall_default():
+def test_wall_default() -> None:
     wall = Wall.default()
     assert len(wall.lines) == 5
     assert wall.lines[0].spaces[0].color == ColoredTile.BLUE
@@ -54,6 +54,29 @@ def test_wall_default():
     assert wall.lines[2].spaces[0].color == ColoredTile.RED
     assert wall.lines[3].spaces[0].color == ColoredTile.BLACK
     assert wall.lines[4].spaces[0].color == ColoredTile.WHITE
+
+
+def test_wall_with_populated() -> None:
+    populated_indices = (
+        (0, ColoredTile.BLUE),
+        (1, ColoredTile.RED),
+        (4, ColoredTile.RED),
+        (3, ColoredTile.RED),
+    )
+    wall = Wall.with_populated(populated_indices)
+    assert len(wall.lines) == 5
+    assert wall.lines[0].spaces[0].color == ColoredTile.BLUE
+    assert wall.lines[1].spaces[0].color == ColoredTile.YELLOW
+    assert wall.lines[2].spaces[0].color == ColoredTile.RED
+    assert wall.lines[3].spaces[0].color == ColoredTile.BLACK
+    assert wall.lines[4].spaces[0].color == ColoredTile.WHITE
+
+    for line_index, line in enumerate(wall):
+        for space in line:
+            if (line_index, space.color) in populated_indices:
+                assert isinstance(space, PopulatedWallSpace)
+            else:
+                assert isinstance(space, EmptyWallSpace)
 
 
 def test_wall_new() -> None:

@@ -76,7 +76,24 @@ def _clear_floor_line(
 
 
 def tile_board(board: Board, discard: TileDiscard) -> tuple[Board, TileDiscard]:
-    """Returns the board tiled and scored with the updated discard pile."""
+    """Moves one tile from completed factory lines to their corresponding wall
+    spaces. Incompleted factory lines are left untouched. Newly-populated wall
+    spaces are scored as soon as they are moved, top-down. This means wall
+    spaces that have not yet been tiled do not count towards the score of the
+    current tile. The remaining tiles in a completed factory display line are
+    moved to the discard pile.
+
+    In the event that a completed pattern line corresponds with a wall space
+    that was previously tiled, all tiles in the pattern line move to the
+    discard and no points are earned.
+
+    Args:
+        board: Game board to tile.
+        discard: Tile discard for the current game.
+
+    Returns:
+        Updated board and tile discard state.
+    """
     earned_score = 0
     pattern_lines: list[PatternLine] = []
     wall_lines: list[WallLine] = list(board.wall.lines)
@@ -127,7 +144,7 @@ def tile_board(board: Board, discard: TileDiscard) -> tuple[Board, TileDiscard]:
 def tile_boards(
     boards: Sequence[Board], discard: TileDiscard
 ) -> tuple[deque[Board], TileDiscard]:
-    """Returns the boards tiled and scored with the updated discard pile."""
+    """Returns the updated boards and tile discard after tiling all boards in the sequence."""
     updated_boards: deque[Board] = deque([])
     for board in boards:
         updated_board, discard = tile_board(board, discard)

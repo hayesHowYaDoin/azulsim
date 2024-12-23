@@ -96,7 +96,7 @@ def _run_factory_offer(game: Game) -> WallTiling:
             continue
         game = next_game
 
-        print(terminal.format_board(board))
+        print(terminal.format_board(game.state.boards[board_index]))
 
     assert isinstance(game, WallTiling)
     return game

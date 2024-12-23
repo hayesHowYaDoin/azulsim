@@ -283,48 +283,64 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
             Board.new(
                 GameScore.new(0),
                 PatternLines.new(
-                    [EmptyPatternLine()] * 2
-                    + [PopulatedPatternLine.new(3, ColoredTile.WHITE)]
-                    + [EmptyPatternLine()] * 2
+                    (
+                        EmptyPatternLine(),
+                        EmptyPatternLine(),
+                        PopulatedPatternLine.new(3, ColoredTile.WHITE),
+                        EmptyPatternLine(),
+                        EmptyPatternLine(),
+                    )
                 ),
                 FloorLine.default(),
                 Wall.with_populated(
-                    [
-                        (index, color)
-                        for index, color in zip(
-                            range(5), wall_tile_sequence(ColoredTile.RED)
-                        )
-                        if index not in (1, 2, 4)
-                    ]
-                    + [
-                        (2, color)
-                        for color in wall_tile_sequence(ColoredTile.RED)
-                        if color
-                        not in (
-                            ColoredTile.RED,
-                            ColoredTile.WHITE,
-                            ColoredTile.YELLOW,
-                        )
-                    ]
+                    (
+                        (0, ColoredTile.RED),
+                        (3, ColoredTile.BLUE),
+                        (2, ColoredTile.BLACK),
+                        (2, ColoredTile.BLUE),
+                    )
                 ),
             ),
             Board.new(
-                GameScore.new(10),
-                PatternLines.default(),
+                GameScore.new(5),
+                PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.default(),
                 Wall.with_populated(
-                    [
-                        (index, color)
-                        for index, color in zip(
-                            range(5), wall_tile_sequence(ColoredTile.RED)
-                        )
-                    ]
-                    + [(2, color) for color in wall_tile_sequence(ColoredTile.RED)]
+                    (
+                        (0, ColoredTile.RED),
+                        (3, ColoredTile.BLUE),
+                        (2, ColoredTile.BLACK),
+                        (2, ColoredTile.BLUE),
+                        (2, ColoredTile.WHITE),
+                    )
                 ),
             ),
             TileDiscard.new([ColoredTile.WHITE] * 2),
         ),
         # Filled pattern line of same color as placed wall space
+        (
+            Board.new(
+                GameScore.new(0),
+                PatternLines.new(
+                    (
+                        EmptyPatternLine(),
+                        EmptyPatternLine(),
+                        PopulatedPatternLine.new(3, ColoredTile.WHITE),
+                        EmptyPatternLine(),
+                        EmptyPatternLine(),
+                    )
+                ),
+                FloorLine.default(),
+                Wall.with_populated(((2, ColoredTile.WHITE),)),
+            ),
+            Board.new(
+                GameScore.new(0),
+                PatternLines.default(),
+                FloorLine.default(),
+                Wall.with_populated(((2, ColoredTile.WHITE),)),
+            ),
+            TileDiscard.new([ColoredTile.WHITE] * 3),
+        ),
     ],
 )
 def test_pattern_lines_board(

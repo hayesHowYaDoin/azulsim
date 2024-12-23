@@ -4,21 +4,19 @@ from azulsim.core import Game, new_game, FactoryOffer, RoundSetup, WallTiling
 from azulsim.shell import terminal
 
 
-def _run_round_setup(game: Game) -> FactoryOffer:
-    assert isinstance(game, RoundSetup)
-
+def _run_round_setup(game: RoundSetup) -> FactoryOffer:
     print(" ROUND SETUP ".center(40, "═"))
 
-    game = game.round_setup()
+    next_game: Game = game.round_setup()
 
-    print(terminal.format_table_center(game.state.table_center))
-    for factory in game.state.factory_displays:
+    print(terminal.format_table_center(next_game.state.table_center))
+    for factory in next_game.state.factory_displays:
         print(terminal.format_factory_display(factory))
 
-    return game
+    return next_game
 
 
-def _run_factory_offer(game: Game) -> WallTiling:
+def _run_factory_offer(game: FactoryOffer) -> WallTiling:
     print(" FACTORY OFFER ".center(40, "═"))
 
     def board_order() -> Generator[int, None, None]:
@@ -29,26 +27,29 @@ def _run_factory_offer(game: Game) -> WallTiling:
 
     board_gen = board_order()
 
-    while isinstance(game, FactoryOffer):
+    next_game: Game = game
+    while isinstance(next_game, FactoryOffer):
         print(" POOL SELECTION ".center(40, "─"))
 
         print("Select a tile pool:")
-        print(f"0:\n{terminal.format_table_center(game.state.table_center)}")
-        for num, factory in enumerate(game.state.factory_displays):
+        print(
+            f"0:\n{terminal.format_table_center(next_game.state.table_center)}"
+        )
+        for num, factory in enumerate(next_game.state.factory_displays):
             print(f"\n{num+1}:\n{terminal.format_factory_display(factory)}")
 
         selected_number = int(input("Selection: "))
         if (
             selected_number < 0
-            or len(game.state.factory_displays) + 1 < selected_number
+            or len(next_game.state.factory_displays) + 1 < selected_number
         ):
             print("Invalid selection.")
             continue
 
         if selected_number == 0:
-            selected_pool = game.state.table_center
-        elif selected_number <= len(game.state.factory_displays.factories):
-            selected_pool = game.state.factory_displays.factories[
+            selected_pool = next_game.state.table_center
+        elif selected_number <= len(next_game.state.factory_displays.factories):
+            selected_pool = next_game.state.factory_displays.factories[
                 selected_number - 1
             ]
         else:
@@ -73,7 +74,7 @@ def _run_factory_offer(game: Game) -> WallTiling:
 
         print("Select pattern line:")
         board_index: int = next(board_gen)
-        board = game.state.boards[board_index]
+        board = next_game.state.boards[board_index]
         pattern_line_strs = terminal.format_pattern_lines(
             board.pattern_lines
         ).split("\n")
@@ -88,30 +89,29 @@ def _run_factory_offer(game: Game) -> WallTiling:
             print("Invalid selection.")
             continue
 
-        next_game = game.factory_offer(
+        maybe_next_game = next_game.factory_offer(
             selected_pool, selected_color, selected_line_index
         )
-        if next_game is None:
+        if maybe_next_game is None:
             print("Factory offer provided invalid selection.")
             continue
-        game = next_game
+        next_game = maybe_next_game
 
-        print(terminal.format_board(game.state.boards[board_index]))
+        print(terminal.format_board(next_game.state.boards[board_index]))
 
-    assert isinstance(game, WallTiling)
-    return game
+    assert isinstance(next_game, WallTiling)
+    return next_game
 
 
-def _run_wall_tiling(game: Game) -> RoundSetup:
-    assert isinstance(game, WallTiling)
-
+def _run_wall_tiling(game: WallTiling) -> RoundSetup:
     print(" WALL TILING ".center(40, "═"))
-    game = game.tile_boards()
 
-    for board in game.state.boards:
+    next_game = game.tile_boards()
+
+    for board in next_game.state.boards:
         print(terminal.format_board(board))
 
-    return game
+    return next_game
 
 
 def main() -> None:

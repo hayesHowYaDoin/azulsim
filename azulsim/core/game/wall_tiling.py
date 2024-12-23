@@ -7,7 +7,6 @@ from typing import Optional, Sequence
 from pydantic.types import NonNegativeInt
 
 from azulsim.core.board.pattern import EmptyPatternLine
-from azulsim.core.board.wall import PopulatedWallSpace
 
 from ..board import (
     Board,

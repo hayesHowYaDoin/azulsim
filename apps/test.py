@@ -18,7 +18,7 @@ def _run_round_setup(game: Game) -> FactoryOffer:
     return game
 
 
-def _run_factory_offer(game: Game) -> Game:
+def _run_factory_offer(game: Game) -> WallTiling:
     print(" FACTORY OFFER ".center(40, "═"))
 
     def board_order() -> Generator[int, None, None]:
@@ -47,10 +47,13 @@ def _run_factory_offer(game: Game) -> Game:
 
         if selected_number == 0:
             selected_pool = game.state.table_center
-        else:
+        elif selected_number <= len(game.state.factory_displays.factories):
             selected_pool = game.state.factory_displays.factories[
                 selected_number - 1
             ]
+        else:
+            print("Invalid selection.")
+            continue
 
         print(" TILE SELECTION ".center(40, "─"))
 
@@ -95,10 +98,11 @@ def _run_factory_offer(game: Game) -> Game:
 
         print(terminal.format_board(board))
 
+    assert isinstance(game, WallTiling)
     return game
 
 
-def _run_wall_tiling(game: Game) -> Game:
+def _run_wall_tiling(game: Game) -> RoundSetup:
     assert isinstance(game, WallTiling)
 
     print(" WALL TILING ".center(40, "═"))

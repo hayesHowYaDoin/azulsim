@@ -1,69 +1,56 @@
-from collections import deque
-import random
+from typing import Generator
 
-from azulsim.core import phases
+from azulsim.core import Game, new_game, FactoryOffer, RoundSetup, WallTiling
 from azulsim.shell import terminal
 
 
-def _run_round_setup(state: phases.Game) -> phases.Game:
+def _run_round_setup(game: Game) -> FactoryOffer:
+    assert isinstance(game, RoundSetup)
+
     print(" ROUND SETUP ".center(40, "═"))
-    boards = state.boards
-    factory_displays = state.factory_displays
-    table_center = state.table_center
-    bag = state.bag
-    discard = state.discard
 
-    tile_pools_result = phases.round_setup.reset_tile_pools(
-        len(boards),
-        bag,
-        discard,
-        lambda x: random.sample(x, 1)[0],
-    )
-    factory_displays = tile_pools_result.factory_displays
-    table_center = tile_pools_result.table_center
-    bag = tile_pools_result.bag
-    discard = tile_pools_result.discard
+    game = game.round_setup()
 
-    print(terminal.format_table_center(table_center))
-    for factory in factory_displays:
+    print(terminal.format_table_center(game.state.table_center))
+    for factory in game.state.factory_displays:
         print(terminal.format_factory_display(factory))
 
-    return phases.Game(
-        boards=boards,
-        factory_displays=factory_displays,
-        table_center=table_center,
-        bag=bag,
-        discard=discard,
-    )
+    return game
 
 
-def _run_factory_offer(state: phases.Game) -> phases.Game:
+def _run_factory_offer(game: Game) -> Game:
     print(" FACTORY OFFER ".center(40, "═"))
 
-    while not phases.factory_offer.phase_end(
-        state.factory_displays, state.table_center
-    ):
+    def board_order() -> Generator[int, None, None]:
+        board_index = 0
+        while True:
+            yield board_index % len(game.state.boards)
+            board_index += 1
+
+    board_gen = board_order()
+
+    while isinstance(game, FactoryOffer):
         print(" POOL SELECTION ".center(40, "─"))
 
-        factories = state.factory_displays.factories
-        table_center = state.table_center
         print("Select a tile pool:")
-        print(f"0:\n{terminal.format_table_center(table_center)}")
-        for num, factory in enumerate(factories):
+        print(f"0:\n{terminal.format_table_center(game.state.table_center)}")
+        for num, factory in enumerate(game.state.factory_displays):
             print(f"\n{num+1}:\n{terminal.format_factory_display(factory)}")
 
         selected_number = int(input("Selection: "))
         if (
             selected_number < 0
-            or len(state.factory_displays) + 1 < selected_number
+            or len(game.state.factory_displays) + 1 < selected_number
         ):
             print("Invalid selection.")
             continue
 
         if selected_number == 0:
-            selected_pool = table_center
+            selected_pool = game.state.table_center
         else:
-            selected_pool = factories[selected_number - 1]
+            selected_pool = game.state.factory_displays.factories[
+                selected_number - 1
+            ]
 
         print(" TILE SELECTION ".center(40, "─"))
 
@@ -79,24 +66,11 @@ def _run_factory_offer(state: phases.Game) -> phases.Game:
 
         selected_color = unique_colors[selected_number]
 
-        result = phases.factory_offer.select_tiles(
-            state.factory_displays,
-            state.table_center,
-            selected_pool,
-            selected_color,
-        )
-        if result is None:
-            print("Invalid selection.")
-            continue
-
-        tiles = result.tiles
-        factories = result.factory_displays
-        table_center = result.table_center
-
         print(" PATTERN LINE SELECTION ".center(40, "─"))
 
         print("Select pattern line:")
-        board = state.boards[0]
+        board_index: int = next(board_gen)
+        board = game.state.boards[board_index]
         pattern_line_strs = terminal.format_pattern_lines(
             board.pattern_lines
         ).split("\n")
@@ -111,54 +85,39 @@ def _run_factory_offer(state: phases.Game) -> phases.Game:
             print("Invalid selection.")
             continue
 
-        board = phases.factory_offer.place_tiles(
-            board,
-            selected_line_index,
-            tiles,
+        next_game = game.factory_offer(
+            selected_pool, selected_color, selected_line_index
         )
-        if board is None:
-            print("Weird error encountered...")
+        if next_game is None:
+            print("Factory offer provided invalid selection.")
             continue
+        game = next_game
 
         print(terminal.format_board(board))
 
-        state = phases.Game(
-            boards=deque([board]),
-            factory_displays=factories,
-            table_center=table_center,
-            bag=state.bag,
-            discard=state.discard,
-        )
-
-    return state
+    return game
 
 
-def _run_wall_tiling(state: phases.Game) -> phases.Game:
+def _run_wall_tiling(game: Game) -> Game:
+    assert isinstance(game, WallTiling)
+
     print(" WALL TILING ".center(40, "═"))
-    boards, discard = phases.wall_tiling.tile_boards(
-        state.boards, state.discard
-    )
+    game = game.tile_boards()
 
-    for board in boards:
+    for board in game.state.boards:
         print(terminal.format_board(board))
 
-    return phases.Game(
-        boards=boards,
-        factory_displays=state.factory_displays,
-        table_center=state.table_center,
-        bag=state.bag,
-        discard=discard,
-    )
+    return game
 
 
 def main() -> None:
-    state = phases.Game.new(player_count=1, seed=42)
+    game = new_game(player_count=1, seed=42)
 
     # TODO: Include end condition for game loop
     while True:
-        state = _run_factory_offer(state)
-        state = _run_wall_tiling(state)
-        state = _run_round_setup(state)
+        game = _run_factory_offer(game)
+        game = _run_wall_tiling(game)
+        game = _run_round_setup(game)
 
 
 if __name__ == "__main__":

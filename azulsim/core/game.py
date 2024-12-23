@@ -30,6 +30,14 @@ class State:
 class RoundSetup:
     _state: State
 
+    @staticmethod
+    def new(state: State) -> RoundSetup:
+        return RoundSetup(_state=state)
+
+    @property
+    def state(self) -> State:
+        return self._state
+
     def round_setup(self) -> FactoryOffer:
         tile_pools_result = round_setup.reset_tile_pools(
             len(self._state.boards),
@@ -46,23 +54,33 @@ class RoundSetup:
             # TODO: Move to end-of-game scoring
             pass
 
-        return FactoryOffer(_state=self._state)
+        return FactoryOffer.new(self._state)
 
 
 @dataclass(kw_only=True)
 class FactoryOffer:
     _state: State
+    _next_board_index: NonNegativeInt
+
+    @staticmethod
+    def new(state: State) -> FactoryOffer:
+        return FactoryOffer(_state=state, _next_board_index=0)
+
+    @property
+    def state(self) -> State:
+        return self._state
+
+    @property
+    def next_board(self) -> Board:
+        return self.state.boards[self._next_board_index]
 
     def factory_offer(
         self,
         tile_pool: PickableTilePool,
         color: ColoredTile,
-        board: Board,
         line_index: Annotated[int, Ge(0), Le(PatternLines.line_count())],
     ) -> Optional[Self | WallTiling]:
-        if board not in self._state.boards:
-            return None
-        board_index = self._state.boards.index(board)
+        board = self.next_board
 
         result = factory_offer.select_tiles(
             self._state.factory_displays,
@@ -83,13 +101,17 @@ class FactoryOffer:
 
         self._state.factory_displays = updated_factory_displays
         self._state.table_center = updated_table_center
-        self._state.boards[board_index] = updated_board
+        self._state.boards[self._next_board_index] = updated_board
+
+        self._next_board_index = (self._next_board_index + 1) % len(
+            self._state.boards
+        )
 
         next_state = self
         if factory_offer.phase_end(
             self._state.factory_displays, self._state.table_center
         ):
-            next_state = WallTiling(_state=self._state)
+            next_state = WallTiling.new(self._state)
 
         return next_state
 
@@ -98,12 +120,20 @@ class FactoryOffer:
 class WallTiling:
     _state: State
 
+    @staticmethod
+    def new(state: State) -> WallTiling:
+        return WallTiling(_state=state)
+
+    @property
+    def state(self) -> State:
+        return self._state
+
     def tile_boards(self) -> RoundSetup:
         self._state.boards, self._state.discard = wall_tiling.tile_boards(
             self._state.boards, self._state.discard
         )
 
-        return RoundSetup(_state=self._state)
+        return RoundSetup.new(self._state)
 
 
 Game: TypeAlias = RoundSetup | FactoryOffer | WallTiling
@@ -137,4 +167,4 @@ def new_game(player_count: PositiveInt, seed: NonNegativeInt) -> FactoryOffer:
         discard=result.discard,
     )
 
-    return FactoryOffer(_state=state)
+    return FactoryOffer.new(state)

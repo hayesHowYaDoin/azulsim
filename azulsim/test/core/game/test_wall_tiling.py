@@ -10,7 +10,6 @@ from azulsim.core.board import (
     EmptyPatternLine,
     PopulatedPatternLine,
     Wall,
-    wall_tile_sequence,
 )
 from azulsim.core.game import wall_tiling
 from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
@@ -343,11 +342,12 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         ),
     ],
 )
-def test_pattern_lines_board(
+def test_wall_tiling(
     input_board: Board,
     expected_board: Board,
     expected_discard: TileDiscard,
 ) -> None:
+    """Tests that the output of wall tiling for a board is as expected for a variety of board states."""
     discard = TileDiscard.default()
     board, discard = wall_tiling.tile_board(input_board, discard)
 

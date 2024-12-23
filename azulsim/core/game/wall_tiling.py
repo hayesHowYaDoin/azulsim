@@ -7,6 +7,7 @@ from typing import Optional, Sequence
 from pydantic.types import NonNegativeInt
 
 from azulsim.core.board.pattern import EmptyPatternLine
+from azulsim.core.board.wall import PopulatedWallSpace
 
 from ..board import (
     Board,
@@ -88,21 +89,26 @@ def tile_board(board: Board, discard: TileDiscard) -> tuple[Board, TileDiscard]:
             and pattern_line.tile_count == line_index + 1
         ):
             color = pattern_line.color
+            newly_populated = isinstance(wall_lines[line_index], EmptyWallSpace)
 
-            discard = discard.add([color] * (pattern_line.tile_count - 1))
+            if newly_populated:
+                wall_lines[line_index] = wall_line.populate_tile(color=color)
+
+                tile_index: Optional[NonNegativeInt] = None
+                for index, space in enumerate(wall_line):
+                    if space.color == color:
+                        tile_index = index
+                assert (
+                    tile_index is not None
+                ), "Could not find tile of color in wall line."
+
+                earned_score += _score_tile(wall_lines, line_index, tile_index)
+                discarded_tile_count = pattern_line.tile_count - 1
+            else:
+                discarded_tile_count = pattern_line.tile_count
+
+            discard = discard.add([color] * discarded_tile_count)
             pattern_line = EmptyPatternLine()
-
-            wall_lines[line_index] = wall_line.populate_tile(color=color)
-
-            tile_index: Optional[NonNegativeInt] = None
-            for index, space in enumerate(wall_line):
-                if space.color == color:
-                    tile_index = index
-            assert (
-                tile_index is not None
-            ), "Could not find tile of color in wall line."
-
-            earned_score += _score_tile(wall_lines, line_index, tile_index)
 
         pattern_lines.append(pattern_line)
 

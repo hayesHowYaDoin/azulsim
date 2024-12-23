@@ -39,7 +39,7 @@ class PopulatedWallSpace:
 WallSpace: TypeAlias = EmptyWallSpace | PopulatedWallSpace
 
 
-def wall_tile_sequence(
+def _wall_tile_sequence(
     start: ColoredTile,
 ) -> Generator[ColoredTile, None, None]:
     color_sequence = deque(
@@ -75,7 +75,7 @@ class WallLine:
         """Returns a wall line starting from the provided leftmost color."""
         row_sequence = (
             EmptyWallSpace.new(tile)
-            for tile in wall_tile_sequence(leftmost_color)
+            for tile in _wall_tile_sequence(leftmost_color)
         )
 
         tiles = tuple(islice(row_sequence, WallLine.tile_count()))
@@ -115,7 +115,7 @@ class WallLine:
         cls, spaces: _WallSpacesTilesType
     ) -> _WallSpacesTilesType:
         space_colors = [space.color for space in spaces]
-        valid_colors = wall_tile_sequence(space_colors[0])
+        valid_colors = _wall_tile_sequence(space_colors[0])
         for color, valid_color in zip(space_colors, valid_colors):
             if color != valid_color:
                 raise ValueError("Colors must follow wall sequence.")
@@ -126,7 +126,7 @@ class WallLine:
 def _build_default_wall_lines() -> (
     tuple[WallLine, WallLine, WallLine, WallLine, WallLine]
 ):
-    left_tile_sequence = wall_tile_sequence(ColoredTile.BLUE)
+    left_tile_sequence = _wall_tile_sequence(ColoredTile.BLUE)
     rows = tuple(
         (WallLine.from_leftmost(next(left_tile_sequence)) for _ in range(5))
     )
@@ -184,7 +184,7 @@ class Wall:
     @classmethod
     def _validate_lines(cls, lines: _WallLinesType) -> _WallLinesType:
         line_start_colors = [line.spaces[0].color for line in lines]
-        valid_colors = wall_tile_sequence(line_start_colors[0])
+        valid_colors = _wall_tile_sequence(line_start_colors[0])
         for color, valid_color in zip(line_start_colors, valid_colors):
             if color != valid_color:
                 raise ValueError("Colors for lines must follow wall sequence.")

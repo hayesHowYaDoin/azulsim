@@ -11,19 +11,22 @@ from azulsim.core.board.wall import (
 from azulsim.core.tiles import ColoredTile
 
 
-def test_empty_wall_space_new():
+def test_empty_wall_space_new() -> None:
+    """Tests that the new constructor for EmptyWallSpace is valid."""
     color = ColoredTile.BLUE
     empty_space = EmptyWallSpace.new(color)
     assert empty_space.color == color
 
 
-def test_populated_wall_space_new():
+def test_populated_wall_space_new() -> None:
+    """Tests that the new constructor for PopulatedWallSpace is valid."""
     color = ColoredTile.RED
     populated_space = PopulatedWallSpace.new(color)
     assert populated_space.color == color
 
 
-def test_wall_line_new():
+def test_wall_line_new() -> None:
+    """Tests that the new constructor for WallLine is valid."""
     wall_row = WallLine.from_leftmost(leftmost_color=ColoredTile.YELLOW)
     assert len(wall_row.spaces) == 5
     assert wall_row.spaces[0].color == ColoredTile.YELLOW
@@ -33,7 +36,8 @@ def test_wall_line_new():
     assert wall_row.spaces[4].color == ColoredTile.BLUE
 
 
-def test_wall_line_invalid_sequence():
+def test_wall_line_invalid_sequence() -> None:
+    """Tests that the new constructor for WallLine throws when given an invalid color sequence."""
     with pytest.raises(ValueError):
         WallLine.new(
             (
@@ -47,6 +51,7 @@ def test_wall_line_invalid_sequence():
 
 
 def test_wall_default() -> None:
+    """Tests that the default constructor for Wall is valid."""
     wall = Wall.default()
     assert len(wall.lines) == 5
     assert wall.lines[0].spaces[0].color == ColoredTile.BLUE
@@ -57,6 +62,7 @@ def test_wall_default() -> None:
 
 
 def test_wall_with_populated() -> None:
+    """Tests that the with_populated constructor for Wall is valid."""
     populated_indices = (
         (0, ColoredTile.BLUE),
         (1, ColoredTile.RED),
@@ -80,6 +86,7 @@ def test_wall_with_populated() -> None:
 
 
 def test_wall_new() -> None:
+    """Tests that the new constructor for Wall is valid."""
     wall = Wall.new(
         (
             WallLine.from_leftmost(ColoredTile.BLACK),
@@ -97,7 +104,8 @@ def test_wall_new() -> None:
     assert wall.lines[4].spaces[0].color == ColoredTile.RED
 
 
-def test_wall_invalid_line_sequence():
+def test_wall_invalid_line_sequence() -> None:
+    """Tests that the new constructor for Wall raises an exception on an invalid color sequence."""
     with pytest.raises(ValueError):
         Wall.new(
             (

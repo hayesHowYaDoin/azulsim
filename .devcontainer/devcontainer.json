@@ -18,7 +18,8 @@
                 "ms-python.python",
                 "ms-python.vscode-pylance",
                 "ms-vscode.makefile-tools",
-                "yzhang.markdown-all-in-one"
+                "yzhang.markdown-all-in-one",
+                "mebrahtom.plantumlpreviewer"
             ]
         }
     }

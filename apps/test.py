@@ -1,11 +1,11 @@
 from collections import deque
 import random
 
-from azulsim.core import game
+from azulsim.core import phases
 from azulsim.shell import terminal
 
 
-def _run_round_setup(state: game.GameState) -> game.GameState:
+def _run_round_setup(state: phases.Game) -> phases.Game:
     print(" ROUND SETUP ".center(40, "═"))
     boards = state.boards
     factory_displays = state.factory_displays
@@ -13,7 +13,7 @@ def _run_round_setup(state: game.GameState) -> game.GameState:
     bag = state.bag
     discard = state.discard
 
-    tile_pools_result = game.round_setup.reset_tile_pools(
+    tile_pools_result = phases.round_setup.reset_tile_pools(
         len(boards),
         bag,
         discard,
@@ -28,7 +28,7 @@ def _run_round_setup(state: game.GameState) -> game.GameState:
     for factory in factory_displays:
         print(terminal.format_factory_display(factory))
 
-    return game.GameState(
+    return phases.Game(
         boards=boards,
         factory_displays=factory_displays,
         table_center=table_center,
@@ -37,10 +37,10 @@ def _run_round_setup(state: game.GameState) -> game.GameState:
     )
 
 
-def _run_factory_offer(state: game.GameState) -> game.GameState:
+def _run_factory_offer(state: phases.Game) -> phases.Game:
     print(" FACTORY OFFER ".center(40, "═"))
 
-    while not game.factory_offer.phase_end(
+    while not phases.factory_offer.phase_end(
         state.factory_displays, state.table_center
     ):
         print(" POOL SELECTION ".center(40, "─"))
@@ -79,7 +79,7 @@ def _run_factory_offer(state: game.GameState) -> game.GameState:
 
         selected_color = unique_colors[selected_number]
 
-        result = game.factory_offer.select_tiles(
+        result = phases.factory_offer.select_tiles(
             state.factory_displays,
             state.table_center,
             selected_pool,
@@ -111,7 +111,7 @@ def _run_factory_offer(state: game.GameState) -> game.GameState:
             print("Invalid selection.")
             continue
 
-        board = game.factory_offer.place_tiles(
+        board = phases.factory_offer.place_tiles(
             board,
             selected_line_index,
             tiles,
@@ -122,7 +122,7 @@ def _run_factory_offer(state: game.GameState) -> game.GameState:
 
         print(terminal.format_board(board))
 
-        state = game.GameState(
+        state = phases.Game(
             boards=deque([board]),
             factory_displays=factories,
             table_center=table_center,
@@ -133,14 +133,16 @@ def _run_factory_offer(state: game.GameState) -> game.GameState:
     return state
 
 
-def _run_wall_tiling(state: game.GameState) -> game.GameState:
+def _run_wall_tiling(state: phases.Game) -> phases.Game:
     print(" WALL TILING ".center(40, "═"))
-    boards, discard = game.wall_tiling.tile_boards(state.boards, state.discard)
+    boards, discard = phases.wall_tiling.tile_boards(
+        state.boards, state.discard
+    )
 
     for board in boards:
         print(terminal.format_board(board))
 
-    return game.GameState(
+    return phases.Game(
         boards=boards,
         factory_displays=state.factory_displays,
         table_center=state.table_center,
@@ -150,11 +152,7 @@ def _run_wall_tiling(state: game.GameState) -> game.GameState:
 
 
 def main() -> None:
-    random.seed(42)
-    state = game.GameState.new(
-        player_count=1,
-        selection_strategy=lambda x: random.sample(x, 1)[0],
-    )
+    state = phases.Game.new(player_count=1, seed=42)
 
     # TODO: Include end condition for game loop
     while True:

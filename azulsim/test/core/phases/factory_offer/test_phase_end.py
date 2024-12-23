@@ -9,7 +9,7 @@ from azulsim.core.factory import (
     UnpickedTableCenter,
     TableCenter,
 )
-from azulsim.core.game import factory_offer
+from azulsim.core.phases import factory_offer
 from azulsim.core.tiles import ColoredTile
 
 

@@ -11,7 +11,7 @@ from azulsim.core.board import (
     PopulatedPatternLine,
     Wall,
 )
-from azulsim.core.game import wall_tiling
+from azulsim.core.phases import wall_tiling
 from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
 
 

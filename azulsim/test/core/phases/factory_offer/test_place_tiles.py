@@ -2,7 +2,7 @@
 
 from pydantic.types import NonNegativeInt, PositiveInt
 
-from azulsim.core.game import factory_offer
+from azulsim.core.phases import factory_offer
 from azulsim.core.board import (
     Board,
     GameScore,

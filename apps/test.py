@@ -1,69 +1,60 @@
-from collections import deque
-import random
+from typing import Generator
 
-from azulsim.core import game
+from azulsim.core import Game, new_game, FactoryOffer, RoundSetup, WallTiling
 from azulsim.shell import terminal
 
 
-def _run_round_setup(state: game.GameState) -> game.GameState:
+def _run_round_setup(game: RoundSetup) -> FactoryOffer:
     print(" ROUND SETUP ".center(40, "═"))
-    boards = state.boards
-    factory_displays = state.factory_displays
-    table_center = state.table_center
-    bag = state.bag
-    discard = state.discard
 
-    tile_pools_result = game.round_setup.reset_tile_pools(
-        len(boards),
-        bag,
-        discard,
-        lambda x: random.sample(x, 1)[0],
-    )
-    factory_displays = tile_pools_result.factory_displays
-    table_center = tile_pools_result.table_center
-    bag = tile_pools_result.bag
-    discard = tile_pools_result.discard
+    next_game: Game = game.round_setup()
 
-    print(terminal.format_table_center(table_center))
-    for factory in factory_displays:
+    print(terminal.format_table_center(next_game.state.table_center))
+    for factory in next_game.state.factory_displays:
         print(terminal.format_factory_display(factory))
 
-    return game.GameState(
-        boards=boards,
-        factory_displays=factory_displays,
-        table_center=table_center,
-        bag=bag,
-        discard=discard,
-    )
+    return next_game
 
 
-def _run_factory_offer(state: game.GameState) -> game.GameState:
+def _run_factory_offer(game: FactoryOffer) -> WallTiling:
     print(" FACTORY OFFER ".center(40, "═"))
 
-    while not game.factory_offer.phase_end(
-        state.factory_displays, state.table_center
-    ):
+    def board_order() -> Generator[int, None, None]:
+        board_index = 0
+        while True:
+            yield board_index % len(game.state.boards)
+            board_index += 1
+
+    board_gen = board_order()
+
+    next_game: Game = game
+    while isinstance(next_game, FactoryOffer):
         print(" POOL SELECTION ".center(40, "─"))
 
-        factories = state.factory_displays.factories
-        table_center = state.table_center
         print("Select a tile pool:")
-        print(f"0:\n{terminal.format_table_center(table_center)}")
-        for num, factory in enumerate(factories):
+        print(
+            f"0:\n{terminal.format_table_center(next_game.state.table_center)}"
+        )
+        for num, factory in enumerate(next_game.state.factory_displays):
             print(f"\n{num+1}:\n{terminal.format_factory_display(factory)}")
 
         selected_number = int(input("Selection: "))
         if (
             selected_number < 0
-            or len(state.factory_displays) + 1 < selected_number
+            or len(next_game.state.factory_displays) + 1 < selected_number
         ):
             print("Invalid selection.")
             continue
 
         if selected_number == 0:
-            selected_pool = table_center
+            selected_pool = next_game.state.table_center
+        elif selected_number <= len(next_game.state.factory_displays.factories):
+            selected_pool = next_game.state.factory_displays.factories[
+                selected_number - 1
+            ]
         else:
-            selected_pool = factories[selected_number - 1]
+            print("Invalid selection.")
+            continue
 
         print(" TILE SELECTION ".center(40, "─"))
 
@@ -79,24 +70,11 @@ def _run_factory_offer(state: game.GameState) -> game.GameState:
 
         selected_color = unique_colors[selected_number]
 
-        result = game.factory_offer.select_tiles(
-            state.factory_displays,
-            state.table_center,
-            selected_pool,
-            selected_color,
-        )
-        if result is None:
-            print("Invalid selection.")
-            continue
-
-        tiles = result.tiles
-        factories = result.factory_displays
-        table_center = result.table_center
-
         print(" PATTERN LINE SELECTION ".center(40, "─"))
 
         print("Select pattern line:")
-        board = state.boards[0]
+        board_index: int = next(board_gen)
+        board = next_game.state.boards[board_index]
         pattern_line_strs = terminal.format_pattern_lines(
             board.pattern_lines
         ).split("\n")
@@ -111,56 +89,39 @@ def _run_factory_offer(state: game.GameState) -> game.GameState:
             print("Invalid selection.")
             continue
 
-        board = game.factory_offer.place_tiles(
-            board,
-            selected_line_index,
-            tiles,
+        maybe_next_game = next_game.factory_offer(
+            selected_pool, selected_color, selected_line_index
         )
-        if board is None:
-            print("Weird error encountered...")
+        if maybe_next_game is None:
+            print("Factory offer provided invalid selection.")
             continue
+        next_game = maybe_next_game
 
-        print(terminal.format_board(board))
+        print(terminal.format_board(next_game.state.boards[board_index]))
 
-        state = game.GameState(
-            boards=deque([board]),
-            factory_displays=factories,
-            table_center=table_center,
-            bag=state.bag,
-            discard=state.discard,
-        )
-
-    return state
+    assert isinstance(next_game, WallTiling)
+    return next_game
 
 
-def _run_wall_tiling(state: game.GameState) -> game.GameState:
+def _run_wall_tiling(game: WallTiling) -> RoundSetup:
     print(" WALL TILING ".center(40, "═"))
-    boards, discard = game.wall_tiling.tile_boards(state.boards, state.discard)
 
-    for board in boards:
+    next_game = game.tile_boards()
+
+    for board in next_game.state.boards:
         print(terminal.format_board(board))
 
-    return game.GameState(
-        boards=boards,
-        factory_displays=state.factory_displays,
-        table_center=state.table_center,
-        bag=state.bag,
-        discard=discard,
-    )
+    return next_game
 
 
 def main() -> None:
-    random.seed(42)
-    state = game.GameState.new(
-        player_count=1,
-        selection_strategy=lambda x: random.sample(x, 1)[0],
-    )
+    game = new_game(player_count=1, seed=42)
 
     # TODO: Include end condition for game loop
     while True:
-        state = _run_factory_offer(state)
-        state = _run_wall_tiling(state)
-        state = _run_round_setup(state)
+        game = _run_factory_offer(game)
+        game = _run_wall_tiling(game)
+        game = _run_round_setup(game)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ from azulsim.core.factory import (
     PickedTableCenter,
     UnpickedTableCenter,
 )
-from azulsim.core.game import factory_offer
+from azulsim.core.phases import factory_offer
 from azulsim.core.tiles import ColoredTile, StartingPlayerMarker
 
 

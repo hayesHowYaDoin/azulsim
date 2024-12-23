@@ -12,18 +12,21 @@ from azulsim.core.board.pattern import (
 from azulsim.core.tiles import ColoredTile
 
 
-def test_empty_pattern_line():
+def test_empty_pattern_line() -> None:
+    """Tests that an EmptyPatternLine can be constructed."""
     line = EmptyPatternLine()
     assert isinstance(line, EmptyPatternLine)
 
 
-def test_populated_pattern_line():
+def test_populated_pattern_line_new() -> None:
+    """Tests that the new constructor for PopulatedPatternLine is valid."""
     line = PopulatedPatternLine.new(tile_count=3, color=ColoredTile.BLUE)
     assert line.tile_count == 3
     assert line.color == ColoredTile.BLUE
 
 
-def test_pattern_lines_default():
+def test_pattern_lines_default() -> None:
+    """Tests that the default constructor for PatternLines is valid."""
     pattern_lines = PatternLines.default()
     assert len(pattern_lines.lines) == 5
     assert all(
@@ -31,7 +34,8 @@ def test_pattern_lines_default():
     )
 
 
-def test_pattern_lines_new_valid():
+def test_pattern_lines_new_valid() -> None:
+    """Tests that the new constructor for PatternLines is valid."""
     lines = (
         PopulatedPatternLine.new(tile_count=1, color=ColoredTile.BLUE),
         EmptyPatternLine(),
@@ -96,5 +100,6 @@ def test_pattern_lines_new_invalid(
         PatternLine, PatternLine, PatternLine, PatternLine, PatternLine
     ],
 ) -> None:
+    """Tests that the new constructor for PatternLines throws when given invalid arguments."""
     with pytest.raises(ValidationError):
         PatternLines.new(lines=invalid_lines)

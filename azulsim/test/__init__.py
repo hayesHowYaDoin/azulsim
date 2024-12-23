@@ -1,1 +1,1 @@
-"""Contains unit tests for the azulsim.core package."""
+"""Contains the unit tests for the azulsim package."""

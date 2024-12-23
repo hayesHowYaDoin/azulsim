@@ -1,0 +1,31 @@
+@startuml
+title Gameplay Sequence Diagram
+
+User -> API: Create game
+API -> API
+API --> User: GameState
+
+loop Until all tiles are selected
+    User -> API: Select tiles from displays
+    API -> API
+    API --> User: GameState, if move was valid
+    User -> API: Place tiles on board
+    API -> API
+    API --> User: GameState, if move was valid
+end
+
+User -> API: Score boards
+API -> API
+API --> User: GameState
+
+User -> API: Check end of game condition
+API -> API
+API --> User: True/False
+
+alt End of game
+    User -> API: Score boards for bonuses
+    API -> API
+    API --> User: GameState
+end
+
+@enduml

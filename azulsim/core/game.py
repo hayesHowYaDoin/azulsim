@@ -1,4 +1,4 @@
-"""Defines the encapsulation of game state."""
+"""Defines the highest-level representation of a game of Azul."""
 
 from __future__ import annotations
 from annotated_types import Ge, Le
@@ -28,17 +28,26 @@ class State:
 
 @dataclass(kw_only=True)
 class RoundSetup:
+    """Round setup gameplay phase."""
+
     _state: State
 
     @staticmethod
     def new(state: State) -> RoundSetup:
+        """Returns an initialized RoundSetup object with the given state."""
         return RoundSetup(_state=state)
 
     @property
     def state(self) -> State:
+        """Returns the internal game state."""
         return self._state
 
     def round_setup(self) -> FactoryOffer:
+        """Executes the round setup phase and returns the next state.
+
+        Returns:
+            A FactoryOffer object constructed with the updated state.
+        """
         tile_pools_result = round_setup.reset_tile_pools(
             len(self._state.boards),
             self._state.bag,
@@ -59,19 +68,24 @@ class RoundSetup:
 
 @dataclass(kw_only=True)
 class FactoryOffer:
+    """Factory offer gameplay phase."""
+
     _state: State
     _next_board_index: NonNegativeInt
 
     @staticmethod
     def new(state: State) -> FactoryOffer:
+        """Returns an initialized FactoryOffer object with the given state."""
         return FactoryOffer(_state=state, _next_board_index=0)
 
     @property
     def state(self) -> State:
+        """Returns the internal game state."""
         return self._state
 
     @property
     def next_board(self) -> Board:
+        """Returns the next board in the turn order."""
         return self.state.boards[self._next_board_index]
 
     def factory_offer(
@@ -80,6 +94,23 @@ class FactoryOffer:
         color: ColoredTile,
         line_index: Annotated[int, Ge(0), Le(PatternLines.line_count())],
     ) -> Optional[Self | WallTiling]:
+        """Executes the factory offer phase for the next board and returns the
+        next state.
+
+        Note: The turn-order is tracked internally by the FactoryOffer object.
+        To indicate to an external player that it is their turn, invoke the
+        next_board method first, then associate that Board with a player.
+
+        Args:
+            tile_pool: The selected tile pool from which to pick from.
+            color: The tile color selected from the tile pool.
+            line_index: The pattern line in which to place the colord tiles.
+
+        Returns:
+            The updated FactoryOffer object or a WallTiling object constructed
+            with the current state. If the argument selection is invalid,
+            returns None.
+        """
         board = self.next_board
 
         result = factory_offer.select_tiles(
@@ -118,24 +149,34 @@ class FactoryOffer:
 
 @dataclass(kw_only=True)
 class WallTiling:
+    """Wall-tiling gameplay phase."""
+
     _state: State
 
     @staticmethod
     def new(state: State) -> WallTiling:
+        """Returns an initialized WallTiling object with the given state."""
         return WallTiling(_state=state)
 
     @property
     def state(self) -> State:
+        """Returns the internal game state."""
         return self._state
 
     def tile_boards(self) -> RoundSetup:
         self._state.boards, self._state.discard = wall_tiling.tile_boards(
             self._state.boards, self._state.discard
         )
+        """
+        Executes the wall tiling phase and returns the next state.
 
+        Returns:
+            A RoundSetup object constructed with the updated state.
+        """
         return RoundSetup.new(self._state)
 
 
+"""Game state machine object encapsulating internal state and possible operations at each phase."""
 Game: TypeAlias = RoundSetup | FactoryOffer | WallTiling
 
 

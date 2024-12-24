@@ -122,6 +122,7 @@ def place_tiles(
     floor_line = board.floor_line.add(new_tiles)
 
     return Board.new(
+        board.uid,
         board.score_track,
         pattern_lines,
         floor_line,

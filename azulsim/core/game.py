@@ -208,6 +208,7 @@ class GameEnd:
         for board, score in zip(self._state.boards, scores):
             scored_boards.append(
                 Board.new(
+                    board.uid,
                     score,
                     board.pattern_lines,
                     board.floor_line,

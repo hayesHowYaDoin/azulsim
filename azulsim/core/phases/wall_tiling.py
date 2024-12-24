@@ -165,6 +165,7 @@ def tile_board(board: Board, discard: TileDiscard) -> tuple[Board, TileDiscard]:
     score = board.score_track + earned_score + deduction
 
     board = Board.new(
+        board.uid,
         score,
         PatternLines.new(pattern_lines),
         floor_line,

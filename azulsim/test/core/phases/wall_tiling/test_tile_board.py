@@ -1,5 +1,7 @@
 """Contains unit tests for the azulsim.core.game.wall_tiling module's tile_board function."""
 
+import uuid
+
 import pytest
 
 from azulsim.core.board import (
@@ -21,12 +23,14 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # No tiles in board
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.default(),
                 Wall.default(),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.default(),
@@ -37,6 +41,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # No tiles in pattern line, tiles in wall
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.new([]),
@@ -51,6 +56,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
                 ),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.default(),
@@ -69,12 +75,14 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # No tiles in pattern line, 2 tiles in floor line (with starting player marker), score is 0
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.new([ColoredTile.BLUE, StartingPlayerMarker()]),
                 Wall.default(),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.default(),
@@ -85,12 +93,14 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # No tiles in pattern line, 2 tiles in floor line, score > deduction
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(5),
                 PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.new([ColoredTile.BLUE, ColoredTile.RED]),
                 Wall.default(),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(3),
                 PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.default(),
@@ -101,12 +111,14 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # No tiles in pattern line, full floor line, score > deduction
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(14),
                 PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.new([ColoredTile.RED] * 7),
                 Wall.default(),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.default(),
@@ -117,6 +129,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # Unfilled pattern lines with unique colors, wall empty, floor empty
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(20),
                 PatternLines.new(
                     [EmptyPatternLine()]
@@ -129,6 +142,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
                 Wall.default(),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(20),
                 PatternLines.new(
                     [EmptyPatternLine()]
@@ -145,6 +159,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # Filled pattern lines with same colors, wall empty, floor empty
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(10),
                 PatternLines.new(
                     [
@@ -156,6 +171,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
                 Wall.default(),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(15),
                 PatternLines.default(),
                 FloorLine.default(),
@@ -168,6 +184,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # Filled pattern lines -> new full vertical run
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new(
                     [
@@ -179,6 +196,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
                 Wall.default(),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(15),
                 PatternLines.default(),
                 FloorLine.default(),
@@ -194,6 +212,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # Filled pattern line -> completes full vertical run
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new(
                     [
@@ -205,6 +224,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
                 Wall.default(),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(15),
                 PatternLines.default(),
                 FloorLine.default(),
@@ -220,6 +240,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # Filled pattern line -> completes full horizontal run
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new(
                     [EmptyPatternLine()] * 4
@@ -233,6 +254,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
                 ),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(5),
                 PatternLines.default(),
                 FloorLine.default(),
@@ -243,6 +265,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # Filled pattern line -> completes full horizontal and vertical runs
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new(
                     [EmptyPatternLine()] * 3
@@ -264,6 +287,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
                 ),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(10),
                 PatternLines.default(),
                 FloorLine.default(),
@@ -280,6 +304,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # Filled pattern line -> creates incomplete horizontal and vertical runs
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new(
                     (
@@ -301,6 +326,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
                 ),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(5),
                 PatternLines.new([EmptyPatternLine()] * 5),
                 FloorLine.default(),
@@ -319,6 +345,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
         # Filled pattern line of same color as placed wall space
         (
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.new(
                     (
@@ -333,6 +360,7 @@ from azulsim.core.tiles import ColoredTile, StartingPlayerMarker, TileDiscard
                 Wall.with_populated(((2, ColoredTile.WHITE),)),
             ),
             Board.new(
+                uuid.uuid4(),
                 GameScore.new(0),
                 PatternLines.default(),
                 FloorLine.default(),

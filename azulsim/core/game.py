@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 from annotated_types import Ge, Le
-from collections import deque
 import random
 from typing import Annotated, Optional, Self, TypeAlias
 
@@ -19,7 +18,7 @@ from .tiles import TileBag, TileDiscard, ColoredTile
 class State:
     """Representation of the current state of a game of Azul."""
 
-    boards: deque[Board]
+    boards: list[Board]
     factory_displays: FactoryDisplays
     table_center: TableCenter
     bag: TileBag
@@ -160,15 +159,19 @@ class WallTiling:
         return self._state
 
     def tile_boards(self) -> RoundSetup | GameEnd:
-        self._state.boards, self._state.discard = wall_tiling.tile_boards(
-            self._state.boards, self._state.discard
-        )
         """
         Executes the wall tiling phase and returns the next state.
 
         Returns:
             A RoundSetup object constructed with the updated state.
         """
+        self._state.boards = wall_tiling.rotate_starting_player(
+            self._state.boards
+        )
+        self._state.boards, self._state.discard = wall_tiling.tile_boards(
+            self._state.boards, self._state.discard
+        )
+
         if wall_tiling.game_end((board.wall for board in self._state.boards)):
             return GameEnd.new(self._state)
 
@@ -189,15 +192,31 @@ class GameEnd:
         """Returns the internal game state."""
         return self._state
 
-    def score_game(self) -> tuple[Board, ...]:
+    def score_bonuses(self) -> State:
         """Adds end-of-game bonuses to each board and returns the updated
         boards in descending order of their scores.
 
         Returns:
             List of updated boards in the same order as they were passed in.
         """
-        boards = end_of_game.score_bonuses(self._state.boards)
-        return tuple(sorted(boards, key=lambda b: b.score_track.score))
+        scores = (
+            end_of_game.score_bonuses(board.wall, board.score_track)
+            for board in self._state.boards
+        )
+
+        scored_boards: list[Board] = []
+        for board, score in zip(self._state.boards, scores):
+            scored_boards.append(
+                Board.new(
+                    score,
+                    board.pattern_lines,
+                    board.floor_line,
+                    board.wall,
+                )
+            )
+
+        self._state.boards = scored_boards
+        return self._state
 
 
 """Game state machine object encapsulating internal state and possible operations at each phase."""
@@ -216,7 +235,7 @@ def new_game(player_count: PositiveInt, seed: NonNegativeInt) -> FactoryOffer:
     """
     random.seed(seed)
 
-    boards = deque([Board.default()] * player_count)
+    boards = [Board.default()] * player_count
     result = round_setup.reset_tile_pools(
         len(boards),
         TileBag.default(),

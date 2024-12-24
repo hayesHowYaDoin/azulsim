@@ -123,9 +123,9 @@ def _run_wall_tiling(game: WallTiling) -> RoundSetup | GameEnd:
 
 def _run_game_end(game: GameEnd) -> None:
     print(" END OF GAME ".center(40, "="))
-    boards = game.score_game()
+    final_state = game.score_bonuses()
 
-    for board in boards:
+    for board in final_state.boards:
         print(terminal.format_board(board))
 
 

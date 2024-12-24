@@ -6,7 +6,6 @@ from typing import Iterable, Optional, Sequence
 
 from pydantic.types import NonNegativeInt
 
-
 from ..board import (
     Board,
     Wall,
@@ -21,7 +20,39 @@ from ..board import (
     FloorLine,
     calculate_floor_penalty,
 )
-from ..tiles import ColoredTile, TileDiscard
+from ..tiles import ColoredTile, StartingPlayerMarker, TileDiscard
+
+
+def rotate_starting_player(boards: Iterable[Board]) -> list[Board]:
+    """Returns the argument boards rotated such that the board with a
+    StartingPlayerMarker in its floor line is the first element in the sequence.
+
+    Args:
+        boards: Collection of all boards in the current turn-order.
+
+    Returns:
+        Collection of boards rotated for the next turn-order.
+    """
+    starting_boards = [
+        board
+        for board in boards
+        if any(
+            isinstance(tile, StartingPlayerMarker)
+            for tile in board.floor_line.tiles
+        )
+    ]
+    if len(starting_boards) != 1:
+        raise ValueError(
+            f"Starting player ambiguous; found {len(starting_boards)} boards "
+            "with starting player marker in floor line."
+        )
+
+    starting_board = starting_boards[0]
+    updated_boards = deque(boards)
+    while updated_boards[0] != starting_board:
+        updated_boards.rotate()
+
+    return list(updated_boards)
 
 
 def _score_sequence(
@@ -143,10 +174,10 @@ def tile_board(board: Board, discard: TileDiscard) -> tuple[Board, TileDiscard]:
 
 
 def tile_boards(
-    boards: Sequence[Board], discard: TileDiscard
-) -> tuple[deque[Board], TileDiscard]:
+    boards: Iterable[Board], discard: TileDiscard
+) -> tuple[list[Board], TileDiscard]:
     """Returns the updated boards and tile discard after tiling all boards in the sequence."""
-    updated_boards: deque[Board] = deque([])
+    updated_boards: list[Board] = []
     for board in boards:
         updated_board, discard = tile_board(board, discard)
         updated_boards.append(updated_board)

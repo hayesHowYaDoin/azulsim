@@ -1,4 +1,4 @@
-"""Contains unit tests for the azulsim.core.game.wall_tiling module."""
+"""Contains unit tests for the azulsim.core.game.wall_tiling module's tile_board function."""
 
 import pytest
 

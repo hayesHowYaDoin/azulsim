@@ -2,21 +2,22 @@
 
 from __future__ import annotations
 from collections import deque
-from typing import Optional, Sequence
+from typing import Iterable, Optional, Sequence
 
 from pydantic.types import NonNegativeInt
 
-from azulsim.core.board.pattern import EmptyPatternLine
 
 from ..board import (
     Board,
-    EmptyWallSpace,
-    PopulatedPatternLine,
     Wall,
     WallLine,
     WallSpace,
-    PatternLine,
+    EmptyWallSpace,
+    PopulatedWallSpace,
     PatternLines,
+    PatternLine,
+    EmptyPatternLine,
+    PopulatedPatternLine,
     FloorLine,
     calculate_floor_penalty,
 )
@@ -151,3 +152,12 @@ def tile_boards(
         updated_boards.append(updated_board)
 
     return updated_boards, discard
+
+
+def game_end(walls: Iterable[Wall]) -> bool:
+    """Returns a boolean value indicating whether or not the game has ended."""
+    return any(
+        all(isinstance(space, PopulatedWallSpace) for space in line)
+        for wall in walls
+        for line in wall
+    )

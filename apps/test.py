@@ -1,10 +1,17 @@
 from typing import Generator
 
-from azulsim.core import Game, new_game, FactoryOffer, RoundSetup, WallTiling
+from azulsim.core import (
+    Game,
+    new_game,
+    FactoryOffer,
+    RoundSetup,
+    WallTiling,
+    GameEnd,
+)
 from azulsim.shell import terminal
 
 
-def _run_round_setup(game: RoundSetup) -> FactoryOffer:
+def _run_round_setup(game: RoundSetup) -> FactoryOffer | GameEnd:
     print(" ROUND SETUP ".center(40, "═"))
 
     next_game: Game = game.round_setup()
@@ -103,7 +110,7 @@ def _run_factory_offer(game: FactoryOffer) -> WallTiling:
     return next_game
 
 
-def _run_wall_tiling(game: WallTiling) -> RoundSetup:
+def _run_wall_tiling(game: WallTiling) -> RoundSetup | GameEnd:
     print(" WALL TILING ".center(40, "═"))
 
     next_game = game.tile_boards()
@@ -114,14 +121,27 @@ def _run_wall_tiling(game: WallTiling) -> RoundSetup:
     return next_game
 
 
+def _run_game_end(game: GameEnd) -> None:
+    print(" END OF GAME ".center(40, "="))
+    boards = game.score_game()
+
+    for board in boards:
+        print(terminal.format_board(board))
+
+
 def main() -> None:
     game = new_game(player_count=1, seed=42)
 
-    # TODO: Include end condition for game loop
-    while True:
-        game = _run_factory_offer(game)
-        game = _run_wall_tiling(game)
-        game = _run_round_setup(game)
+    while not isinstance(game, GameEnd):
+        match game:
+            case FactoryOffer():
+                game = _run_factory_offer(game)
+            case WallTiling():
+                game = _run_wall_tiling(game)
+            case RoundSetup():
+                game = _run_round_setup(game)
+
+    _run_game_end(game)
 
 
 if __name__ == "__main__":

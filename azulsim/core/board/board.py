@@ -41,9 +41,9 @@ class Board:
     ) -> Board:
         """Returns a board with the argument sections."""
         return Board(
+            uid=uuid.uuid4(),
             score_track=score_track,
             pattern_lines=pattern_lines,
             floor_line=floor_line,
             wall=wall,
-            uid=uuid.uuid4(),
         )

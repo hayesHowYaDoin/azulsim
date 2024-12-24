@@ -1,6 +1,6 @@
 """Defines the round setup phase."""
 
-from typing import Callable, Iterable, Sequence
+from typing import Callable, Sequence
 
 from pydantic.types import PositiveInt
 from pydantic.dataclasses import dataclass
@@ -12,16 +12,6 @@ from ..tiles import (
     TileDiscard,
     reset_tile_bag,
 )
-from ..board import Wall, PopulatedWallSpace
-
-
-def game_end(walls: Iterable[Wall]) -> bool:
-    """Returns a boolean value indicating whether or not the game has ended."""
-    return any(
-        all(isinstance(space, PopulatedWallSpace) for space in line)
-        for wall in walls
-        for line in wall
-    )
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -11,7 +11,7 @@ from pydantic.dataclasses import dataclass
 
 from .board import Board, PatternLines
 from .factory import FactoryDisplays, TableCenter, PickableTilePool
-from .phases import factory_offer, round_setup, wall_tiling
+from .phases import factory_offer, round_setup, wall_tiling, end_of_game
 from .tiles import TileBag, TileDiscard, ColoredTile
 
 
@@ -58,10 +58,6 @@ class RoundSetup:
         self._state.table_center = tile_pools_result.table_center
         self._state.bag = tile_pools_result.bag
         self._state.discard = tile_pools_result.discard
-
-        if round_setup.game_end((board.wall for board in self._state.boards)):
-            # TODO: Move to end-of-game scoring
-            pass
 
         return FactoryOffer.new(self._state)
 
@@ -163,7 +159,7 @@ class WallTiling:
         """Returns the internal game state."""
         return self._state
 
-    def tile_boards(self) -> RoundSetup:
+    def tile_boards(self) -> RoundSetup | GameEnd:
         self._state.boards, self._state.discard = wall_tiling.tile_boards(
             self._state.boards, self._state.discard
         )
@@ -173,11 +169,39 @@ class WallTiling:
         Returns:
             A RoundSetup object constructed with the updated state.
         """
+        if wall_tiling.game_end((board.wall for board in self._state.boards)):
+            return GameEnd.new(self._state)
+
         return RoundSetup.new(self._state)
 
 
+@dataclass(kw_only=True)
+class GameEnd:
+    _state: State
+
+    @staticmethod
+    def new(state: State) -> GameEnd:
+        """Returns an initialized GameEnd object with the given state."""
+        return GameEnd(_state=state)
+
+    @property
+    def state(self) -> State:
+        """Returns the internal game state."""
+        return self._state
+
+    def score_game(self) -> tuple[Board, ...]:
+        """Adds end-of-game bonuses to each board and returns the updated
+        boards in descending order of their scores.
+
+        Returns:
+            List of updated boards in the same order as they were passed in.
+        """
+        boards = end_of_game.score_bonuses(self._state.boards)
+        return tuple(sorted(boards, key=lambda b: b.score_track.score))
+
+
 """Game state machine object encapsulating internal state and possible operations at each phase."""
-Game: TypeAlias = RoundSetup | FactoryOffer | WallTiling
+Game: TypeAlias = RoundSetup | FactoryOffer | WallTiling | GameEnd
 
 
 def new_game(player_count: PositiveInt, seed: NonNegativeInt) -> FactoryOffer:

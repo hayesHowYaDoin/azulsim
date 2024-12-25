@@ -1,7 +1,6 @@
 """Defines the wall tiling (scoring) phase."""
 
 from __future__ import annotations
-from collections import deque
 from typing import Iterable, Optional, Sequence
 
 from pydantic.types import NonNegativeInt
@@ -23,9 +22,9 @@ from ..board import (
 from ..tiles import ColoredTile, StartingPlayerMarker, TileDiscard
 
 
-def rotate_starting_player(boards: Iterable[Board]) -> list[Board]:
-    """Returns the argument boards rotated such that the board with a
-    StartingPlayerMarker in its floor line is the first element in the sequence.
+def next_starting_board(boards: Iterable[Board]) -> NonNegativeInt:
+    """Returns the index of the Board whose FloorLine contains the
+    StartingPlayerMarker.
 
     Args:
         boards: Collection of all boards in the current turn-order.
@@ -33,26 +32,21 @@ def rotate_starting_player(boards: Iterable[Board]) -> list[Board]:
     Returns:
         Collection of boards rotated for the next turn-order.
     """
-    starting_boards = [
-        board
-        for board in boards
+    starting_board_indices = [
+        index
+        for index, board in enumerate(boards)
         if any(
             isinstance(tile, StartingPlayerMarker)
             for tile in board.floor_line.tiles
         )
     ]
-    if len(starting_boards) != 1:
+    if len(starting_board_indices) != 1:
         raise ValueError(
-            f"Starting player ambiguous; found {len(starting_boards)} boards "
-            "with starting player marker in floor line."
+            f"Starting player ambiguous; found {len(starting_board_indices)} "
+            "boards with starting player marker in floor line."
         )
 
-    starting_board = starting_boards[0]
-    updated_boards = deque(boards)
-    while updated_boards[0] != starting_board:
-        updated_boards.rotate()
-
-    return list(updated_boards)
+    return starting_board_indices[0]
 
 
 def _score_sequence(
@@ -165,7 +159,6 @@ def tile_board(board: Board, discard: TileDiscard) -> tuple[Board, TileDiscard]:
     score = board.score_track + earned_score + deduction
 
     board = Board.new(
-        board.uid,
         score,
         PatternLines.new(pattern_lines),
         floor_line,

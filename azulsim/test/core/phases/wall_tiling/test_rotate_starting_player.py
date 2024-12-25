@@ -1,7 +1,5 @@
 """Contains unit tests for the azulsim.core.game.wall_tiling module's rotate_starting_player function."""
 
-import uuid
-
 import pytest
 
 from azulsim.core.board import Board, GameScore, PatternLines, FloorLine, Wall
@@ -13,17 +11,15 @@ def test_single_player() -> None:
     """Tests that the function returns the one board in a single-player game."""
     boards = [
         Board.new(
-            uuid.uuid4(),
             GameScore.new(0),
             PatternLines.default(),
             FloorLine.new([StartingPlayerMarker()]),
             Wall.default(),
         )
     ]
-    rotated_boards = wall_tiling.rotate_starting_player(boards)
+    starting_player_index = wall_tiling.next_starting_board(boards)
 
-    assert len(rotated_boards) == 1
-    assert rotated_boards[0] == boards[0]
+    assert starting_player_index == 0
 
 
 def test_multiplayer() -> None:
@@ -31,7 +27,6 @@ def test_multiplayer() -> None:
     boards = [
         Board.default(),
         Board.new(
-            uuid.uuid4(),
             GameScore.new(0),
             PatternLines.default(),
             FloorLine.new([StartingPlayerMarker()]),
@@ -39,12 +34,9 @@ def test_multiplayer() -> None:
         ),
         Board.default(),
     ]
-    rotated_boards = wall_tiling.rotate_starting_player(boards)
+    starting_player_index = wall_tiling.next_starting_board(boards)
 
-    assert len(rotated_boards) == 3
-    assert rotated_boards[0] == boards[1]
-    assert rotated_boards[1] == boards[2]
-    assert rotated_boards[2] == boards[0]
+    assert starting_player_index == 1
 
 
 def test_no_single_player_marker() -> None:
@@ -55,4 +47,4 @@ def test_no_single_player_marker() -> None:
         Board.default(),
     ]
     with pytest.raises(ValueError):
-        _rotated_boards = wall_tiling.rotate_starting_player(boards)
+        _rotated_boards = wall_tiling.next_starting_board(boards)

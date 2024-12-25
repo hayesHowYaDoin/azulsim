@@ -14,8 +14,8 @@ from .tiles import ColoredTile
 class FactoryDisplay:
     """A factory display which contains a pot of tiles."""
 
-    id: uuid.UUID
     tiles: tuple[ColoredTile, ColoredTile, ColoredTile, ColoredTile]
+    _uid: uuid.UUID
 
     @staticmethod
     def new(tiles: Sequence[ColoredTile]) -> FactoryDisplay:
@@ -28,7 +28,7 @@ class FactoryDisplay:
             len(tiles_tuple) == 4
         ), "Number of tiles in a factory display must be 4."
 
-        return FactoryDisplay(tiles=tiles_tuple, id=uuid.uuid4())
+        return FactoryDisplay(tiles=tiles_tuple, _uid=uuid.uuid4())
 
     def count(self, color: ColoredTile) -> NonNegativeInt:
         """Returns the number of tiles of a given color are in the factory display."""

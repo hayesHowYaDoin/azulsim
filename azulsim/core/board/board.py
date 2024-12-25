@@ -64,7 +64,7 @@ class Boards:
         boards: Sequence[Board], starting_board_index: NonNegativeInt
     ) -> Boards:
         """Returns a Boards object with the given Board objects in turn-order."""
-        if starting_board_index < 0 or len(boards) >= len(boards):
+        if starting_board_index < 0 or len(boards) <= starting_board_index:
             raise ValueError(
                 f"Starting board index out of bounds (starting_board_index={starting_board_index})."
             )

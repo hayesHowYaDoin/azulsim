@@ -1,7 +1,4 @@
-from typing import Generator
-
 from pydantic import NonNegativeInt
-
 from azulsim.core import (
     Game,
     new_game,
@@ -25,19 +22,18 @@ def _run_round_setup(game: RoundSetup) -> FactoryOffer | GameEnd:
     return next_game
 
 
-def _run_factory_offer(game: FactoryOffer) -> WallTiling:
+def _run_factory_offer(
+    game: FactoryOffer,
+    board_to_player: dict[NonNegativeInt, str],
+) -> WallTiling:
     print(" FACTORY OFFER ".center(40, "═"))
-
-    def board_order() -> Generator[int, None, None]:
-        board_index = 0
-        while True:
-            yield board_index % len(game.state.boards)
-            board_index += 1
-
-    board_gen = board_order()
 
     next_game: Game = game
     while isinstance(next_game, FactoryOffer):
+        board_index: int = game.next_board_index()
+        print(f" NOW SERVING {board_to_player[board_index]} ".center(40, "-"))
+        print(terminal.format_board(game.state.boards[board_index]))
+
         print(" POOL SELECTION ".center(40, "─"))
 
         print("Select a tile pool:")
@@ -82,7 +78,6 @@ def _run_factory_offer(game: FactoryOffer) -> WallTiling:
         print(" PATTERN LINE SELECTION ".center(40, "─"))
 
         print("Select pattern line:")
-        board_index: int = next(board_gen)
         board = next_game.state.boards[board_index]
         pattern_line_strs = terminal.format_pattern_lines(
             board.pattern_lines
@@ -133,11 +128,16 @@ def _run_game_end(game: GameEnd) -> None:
 
 def main() -> None:
     game = new_game(player_count=3, seed=42)
+    board_to_player = {
+        0: "Player1",
+        1: "Player2",
+        2: "Player3",
+    }
 
     while not isinstance(game, GameEnd):
         match game:
             case FactoryOffer():
-                game = _run_factory_offer(game)
+                game = _run_factory_offer(game, board_to_player)
             case WallTiling():
                 game = _run_wall_tiling(game)
             case RoundSetup():

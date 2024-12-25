@@ -67,23 +67,29 @@ class FactoryOffer:
 
     _state: State
     _next_board_index: NonNegativeInt
+    _next_board_gen: Generator[NonNegativeInt, None, None]
 
     @staticmethod
     def new(state: State) -> FactoryOffer:
         """Returns an initialized FactoryOffer object with the given state."""
-        return FactoryOffer(_state=state, _next_board_index=0)
+        next_board_gen = state.boards.turn_order()
+        next_board_index = next(next_board_gen)
+        return FactoryOffer(
+            _state=state,
+            _next_board_index=next_board_index,
+            _next_board_gen=next_board_gen,
+        )
 
     @property
     def state(self) -> State:
         """Returns the internal game state."""
         return self._state
 
-    def next_board_index(self) -> Generator[NonNegativeInt, None, None]:
-        return self._state.boards.turn_order()
+    def next_board_index(self) -> NonNegativeInt:
+        return self._next_board_index
 
     def factory_offer(
         self,
-        board_key: NonNegativeInt,
         tile_pool: PickableTilePool,
         color: ColoredTile,
         line_index: Annotated[int, Ge(0), Le(PatternLines.line_count())],
@@ -131,9 +137,7 @@ class FactoryOffer:
             self._next_board_index, updated_board
         )
 
-        self._next_board_index = (
-            self._next_board_index + 1
-        ) % self._state.boards.count()
+        self._next_board_index = next(self._next_board_gen)
 
         next_state = self
         if factory_offer.phase_end(

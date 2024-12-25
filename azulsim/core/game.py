@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 from annotated_types import Ge, Le
-from collections import deque
 import random
 from typing import Annotated, Optional, Self, TypeAlias
 
@@ -11,7 +10,7 @@ from pydantic.dataclasses import dataclass
 
 from .board import Board, PatternLines
 from .factory import FactoryDisplays, TableCenter, PickableTilePool
-from .phases import factory_offer, round_setup, wall_tiling
+from .phases import factory_offer, round_setup, wall_tiling, end_of_game
 from .tiles import TileBag, TileDiscard, ColoredTile
 
 
@@ -19,7 +18,7 @@ from .tiles import TileBag, TileDiscard, ColoredTile
 class State:
     """Representation of the current state of a game of Azul."""
 
-    boards: deque[Board]
+    boards: list[Board]
     factory_displays: FactoryDisplays
     table_center: TableCenter
     bag: TileBag
@@ -58,10 +57,6 @@ class RoundSetup:
         self._state.table_center = tile_pools_result.table_center
         self._state.bag = tile_pools_result.bag
         self._state.discard = tile_pools_result.discard
-
-        if round_setup.game_end((board.wall for board in self._state.boards)):
-            # TODO: Move to end-of-game scoring
-            pass
 
         return FactoryOffer.new(self._state)
 
@@ -163,21 +158,70 @@ class WallTiling:
         """Returns the internal game state."""
         return self._state
 
-    def tile_boards(self) -> RoundSetup:
-        self._state.boards, self._state.discard = wall_tiling.tile_boards(
-            self._state.boards, self._state.discard
-        )
+    def tile_boards(self) -> RoundSetup | GameEnd:
         """
         Executes the wall tiling phase and returns the next state.
 
         Returns:
             A RoundSetup object constructed with the updated state.
         """
+        self._state.boards = wall_tiling.rotate_starting_player(
+            self._state.boards
+        )
+        self._state.boards, self._state.discard = wall_tiling.tile_boards(
+            self._state.boards, self._state.discard
+        )
+
+        if wall_tiling.game_end((board.wall for board in self._state.boards)):
+            return GameEnd.new(self._state)
+
         return RoundSetup.new(self._state)
 
 
+@dataclass(kw_only=True)
+class GameEnd:
+    _state: State
+
+    @staticmethod
+    def new(state: State) -> GameEnd:
+        """Returns an initialized GameEnd object with the given state."""
+        return GameEnd(_state=state)
+
+    @property
+    def state(self) -> State:
+        """Returns the internal game state."""
+        return self._state
+
+    def score_bonuses(self) -> State:
+        """Adds end-of-game bonuses to each board and returns the updated
+        boards in descending order of their scores.
+
+        Returns:
+            List of updated boards in the same order as they were passed in.
+        """
+        scores = (
+            end_of_game.score_bonuses(board.wall, board.score_track)
+            for board in self._state.boards
+        )
+
+        scored_boards: list[Board] = []
+        for board, score in zip(self._state.boards, scores):
+            scored_boards.append(
+                Board.new(
+                    board.uid,
+                    score,
+                    board.pattern_lines,
+                    board.floor_line,
+                    board.wall,
+                )
+            )
+
+        self._state.boards = scored_boards
+        return self._state
+
+
 """Game state machine object encapsulating internal state and possible operations at each phase."""
-Game: TypeAlias = RoundSetup | FactoryOffer | WallTiling
+Game: TypeAlias = RoundSetup | FactoryOffer | WallTiling | GameEnd
 
 
 def new_game(player_count: PositiveInt, seed: NonNegativeInt) -> FactoryOffer:
@@ -192,7 +236,7 @@ def new_game(player_count: PositiveInt, seed: NonNegativeInt) -> FactoryOffer:
     """
     random.seed(seed)
 
-    boards = deque([Board.default()] * player_count)
+    boards = [Board.default()] * player_count
     result = round_setup.reset_tile_pools(
         len(boards),
         TileBag.default(),

@@ -1,6 +1,6 @@
-"""Contains unit tests for the azulsim.core.game.round_setup module's reset_tile_pools function."""
+"""Contains unit tests for the azulsim.core.game.wall_tiling module's game_end function."""
 
-from azulsim.core.phases import round_setup
+from azulsim.core.phases import wall_tiling
 from azulsim.core.board import Wall
 from azulsim.core.tiles import ColoredTile
 
@@ -13,7 +13,7 @@ def test_wall_with_full_horizontal() -> None:
         Wall.default(),
         Wall.default(),
     )
-    assert round_setup.game_end(walls)
+    assert wall_tiling.game_end(walls)
 
 
 def test_no_full_horizontal() -> None:
@@ -22,4 +22,4 @@ def test_no_full_horizontal() -> None:
         Wall.default(),
         Wall.default(),
     )
-    assert not round_setup.game_end(walls)
+    assert not wall_tiling.game_end(walls)

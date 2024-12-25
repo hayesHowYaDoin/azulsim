@@ -1,5 +1,7 @@
 """Contains unit tests for the azulsim.core.game.factory_offer module's place_tiles function."""
 
+import uuid
+
 from pydantic.types import NonNegativeInt, PositiveInt
 
 from azulsim.core.phases import factory_offer
@@ -28,6 +30,7 @@ def _build_populated_board(
 
     pattern_lines = PatternLines.new(raw_pattern_lines)
     return Board.new(
+        uuid.uuid4(),
         GameScore.new(0),
         pattern_lines,
         FloorLine.default(),

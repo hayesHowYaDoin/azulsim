@@ -34,6 +34,7 @@ class Board:
 
     @staticmethod
     def new(
+        uid: uuid.UUID,
         score_track: GameScore,
         pattern_lines: PatternLines,
         floor_line: FloorLine,
@@ -41,9 +42,9 @@ class Board:
     ) -> Board:
         """Returns a board with the argument sections."""
         return Board(
+            uid=uid,
             score_track=score_track,
             pattern_lines=pattern_lines,
             floor_line=floor_line,
             wall=wall,
-            uid=uuid.uuid4(),
         )

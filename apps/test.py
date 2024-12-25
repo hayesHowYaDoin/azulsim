@@ -1,5 +1,7 @@
 from typing import Generator
 
+from pydantic import NonNegativeInt
+
 from azulsim.core import (
     Game,
     new_game,
@@ -130,7 +132,7 @@ def _run_game_end(game: GameEnd) -> None:
 
 
 def main() -> None:
-    game = new_game(player_count=1, seed=42)
+    game = new_game(player_count=3, seed=42)
 
     while not isinstance(game, GameEnd):
         match game:

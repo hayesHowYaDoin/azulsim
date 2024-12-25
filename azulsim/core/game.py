@@ -3,12 +3,12 @@
 from __future__ import annotations
 from annotated_types import Ge, Le
 import random
-from typing import Annotated, Optional, Self, TypeAlias
+from typing import Annotated, Optional, Self, TypeAlias, Generator
 
 from pydantic import NonNegativeInt, PositiveInt
 from pydantic.dataclasses import dataclass
 
-from .board import Board, PatternLines
+from .board import Board, Boards, PatternLines
 from .factory import FactoryDisplays, TableCenter, PickableTilePool
 from .phases import factory_offer, round_setup, wall_tiling, end_of_game
 from .tiles import TileBag, TileDiscard, ColoredTile
@@ -18,7 +18,7 @@ from .tiles import TileBag, TileDiscard, ColoredTile
 class State:
     """Representation of the current state of a game of Azul."""
 
-    boards: list[Board]
+    boards: Boards
     factory_displays: FactoryDisplays
     table_center: TableCenter
     bag: TileBag
@@ -48,7 +48,7 @@ class RoundSetup:
             A FactoryOffer object constructed with the updated state.
         """
         tile_pools_result = round_setup.reset_tile_pools(
-            len(self._state.boards),
+            self._state.boards.count(),
             self._state.bag,
             self._state.discard,
             lambda x: random.sample(x, 1)[0],
@@ -78,13 +78,12 @@ class FactoryOffer:
         """Returns the internal game state."""
         return self._state
 
-    @property
-    def next_board(self) -> Board:
-        """Returns the next board in the turn order."""
-        return self.state.boards[self._next_board_index]
+    def next_board_index(self) -> Generator[NonNegativeInt, None, None]:
+        return self._state.boards.turn_order()
 
     def factory_offer(
         self,
+        board_key: NonNegativeInt,
         tile_pool: PickableTilePool,
         color: ColoredTile,
         line_index: Annotated[int, Ge(0), Le(PatternLines.line_count())],
@@ -106,7 +105,7 @@ class FactoryOffer:
             with the current state. If the argument selection is invalid,
             returns None.
         """
-        board = self.next_board
+        board = self._state.boards[self._next_board_index]
 
         result = factory_offer.select_tiles(
             self._state.factory_displays,
@@ -127,11 +126,14 @@ class FactoryOffer:
 
         self._state.factory_displays = updated_factory_displays
         self._state.table_center = updated_table_center
-        self._state.boards[self._next_board_index] = updated_board
 
-        self._next_board_index = (self._next_board_index + 1) % len(
-            self._state.boards
+        self._state.boards = self._state.boards.set_board(
+            self._next_board_index, updated_board
         )
+
+        self._next_board_index = (
+            self._next_board_index + 1
+        ) % self._state.boards.count()
 
         next_state = self
         if factory_offer.phase_end(
@@ -165,11 +167,18 @@ class WallTiling:
         Returns:
             A RoundSetup object constructed with the updated state.
         """
-        self._state.boards = wall_tiling.rotate_starting_player(
-            self._state.boards
+        starting_board_key = wall_tiling.next_starting_board(
+            self._state.boards.boards
         )
-        self._state.boards, self._state.discard = wall_tiling.tile_boards(
-            self._state.boards, self._state.discard
+        self._state.boards = self._state.boards.set_starting_board(
+            starting_board_key
+        )
+
+        tiled_boards, self._state.discard = wall_tiling.tile_boards(
+            self._state.boards.boards, self._state.discard
+        )
+        self._state.boards = Boards.new(
+            tiled_boards, self._state.boards.starting_board_index
         )
 
         if wall_tiling.game_end((board.wall for board in self._state.boards)):
@@ -205,10 +214,9 @@ class GameEnd:
         )
 
         scored_boards: list[Board] = []
-        for board, score in zip(self._state.boards, scores):
+        for board, score in zip(self._state.boards.boards, scores):
             scored_boards.append(
                 Board.new(
-                    board.uid,
                     score,
                     board.pattern_lines,
                     board.floor_line,
@@ -216,7 +224,9 @@ class GameEnd:
                 )
             )
 
-        self._state.boards = scored_boards
+        self._state.boards = Boards.new(
+            scored_boards, self._state.boards.starting_board_index
+        )
         return self._state
 
 
@@ -236,9 +246,9 @@ def new_game(player_count: PositiveInt, seed: NonNegativeInt) -> FactoryOffer:
     """
     random.seed(seed)
 
-    boards = [Board.default()] * player_count
+    boards = Boards.with_defaulted(player_count)
     result = round_setup.reset_tile_pools(
-        len(boards),
+        player_count,
         TileBag.default(),
         TileDiscard.default(),
         selection_strategy=lambda x: random.sample(x, 1)[0],
